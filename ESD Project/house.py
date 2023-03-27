@@ -2,9 +2,8 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay/house'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 
 db = SQLAlchemy(app)
 
@@ -14,7 +13,7 @@ class House(db.Model):
     
     houseID = db.Column(db.Integer, primary_key=True)
     houseName = db.Column(db.String(64), nullable=False)
-    address = db.Column(db.Float(precision=2), nullable=False)
+    address = db.Column(db.String(255), nullable=False)
     region = db.Column(db.String(50), nullable=False)
     latitude = db.Column(db.Float(11,8), nullable=False)
     longitude = db.Column(db.Float(12,8), nullable=False)
