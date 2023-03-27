@@ -90,5 +90,3 @@ INSERT INTO `g1t3-aangstay`.`payment` (`paymentId`, `tDate`, `paidAmount`, `stat
 -- status: COMPLETED/DECLINED/REFUNDED/FAILED
 ('1', '2023-03-21', '100', 'completed', '1'),
 ('2', '2023-03-21', '150', 'refunded', '3');
-
-
