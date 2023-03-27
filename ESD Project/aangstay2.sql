@@ -22,20 +22,17 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS `g1t3-aangstay` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `g1t3-aangstay`;
 
-
--- House DB
-
-CREATE TABLE IF NOT EXISTS `g1t3-aangstay`.`house` (
-  `houseId` INT NOT NULL AUTO_INCREMENT,
-  `houseName` VARCHAR(100) NOT NULL,
-  `address` VARCHAR(255) NOT NULL,
-  `region` VARCHAR(50) NOT NULL, /*Important for house search, UC1*/
-  `latitude` DECIMAL(11,8) NOT NULL,
-  `longitude` DECIMAL(12,8) NOT NULL,
-  `price` DECIMAL NOT NULL,
-  UNIQUE INDEX `houseId_UNIQUE` (`houseId` ASC),
-  PRIMARY KEY (`houseID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `house` (
+  `houseId` int NOT NULL AUTO_INCREMENT,
+  `houseName` varchar(100) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `region` varchar(50) NOT NULL,
+  `latitude` decimal(11,8) NOT NULL,
+  `longitude` decimal(12,8) NOT NULL,
+  `price` decimal(10,0) NOT NULL,
+  PRIMARY KEY (`houseId`),
+  UNIQUE KEY `houseId_UNIQUE` (`houseId`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
 
 -- Dumping data for table `house` 
 
@@ -53,30 +50,19 @@ INSERT INTO `g1t3-aangstay`.`house` (`houseId`,`houseName`,`address`,`region`,`l
 (11, 'River Vale', '43 Jln Chengkek, Singapore 369266', 'Singapore', 1.3306012861113672, 103.88469366829857,200),
 (12, 'Hill Vale', '35 Jln Tupai, Singapore 249162', 'Singapore', 1.301830541540901, 103.82685763633978,150);
 
-
--- Dumping data for table `transaction` 
-
-CREATE TABLE IF NOT EXISTS `g1t3-aangstay`.`transaction` (
-  `transactionId` INT NOT NULL AUTO_INCREMENT,
-  `startDate` DATE NOT NULL,
-  `endDate` DATE NOT NULL,
-  `status` VARCHAR(20) NOT NULL,
-  `houseId` INT(11) NOT NULL,
-  `bookingNum` VARCHAR(6) NULL,
+CREATE TABLE `transaction` (
+  `transactionId` int NOT NULL AUTO_INCREMENT,
+  `startDate` date NOT NULL,
+  `endDate` date NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `houseId` int NOT NULL,
+  `bookingNum` varchar(6) DEFAULT NULL,
   PRIMARY KEY (`transactionId`),
-  UNIQUE INDEX `transactionId_UNIQUE` (`transactionId` ASC),
-  UNIQUE INDEX `bookingNum_UNIQUE` (`bookingNum` ASC),
-  INDEX `houseId_idx` (`houseId` ASC),
-  CONSTRAINT `houseId`
-    FOREIGN KEY (`houseId`)
-    REFERENCES `g1t3-aangstay`.`house` (`houseId`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_unicode_ci;
-
-
+  UNIQUE KEY `transactionId_UNIQUE` (`transactionId`),
+  UNIQUE KEY `bookingNum_UNIQUE` (`bookingNum`),
+  KEY `houseId_idx` (`houseId`),
+  CONSTRAINT `houseId` FOREIGN KEY (`houseId`) REFERENCES `house` (`houseId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `g1t3-aangstay`.`transaction` (`transactionId`,`startDate`, `endDate`,`status`,`houseId`,`bookingNum`) VALUES
 ('10000001','2023-04-05', '2023-04-09','confirmed',5,'3FB3B3'); 
@@ -89,25 +75,20 @@ INSERT INTO `g1t3-aangstay`.`transaction` (`startDate`, `endDate`,`status`,`hous
 ('2023-04-10', '2023-04-12','confirmed','6', '7F86A4'),
 ('2023-04-18', '2023-04-20','confirmed',7, 'E85981');
 
--- Dumping data for table `transaction` 
-
-CREATE TABLE `g1t3-aangstay`.`payment` (
-  `paymentId` INT NOT NULL AUTO_INCREMENT,
-  `tDate` DATE NOT NULL,
-  `paidAmount` DECIMAL NOT NULL,
-  `status` VARCHAR(25) NOT NULL,
-  `houseId` INT NOT NULL,
+CREATE TABLE `payment` (
+  `paymentId` int NOT NULL,
+  `tDate` date NOT NULL,
+  `paidAmount` decimal(10,0) NOT NULL,
+  `status` varchar(25) NOT NULL,
+  `houseId` int NOT NULL,
   PRIMARY KEY (`paymentId`),
-  INDEX `houseId_idx` (`houseId` ASC),
-  CONSTRAINT `houseId`
-    FOREIGN KEY (`houseId`)
-    REFERENCES `g1t3-aangstay`.`house` (`houseId`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
+  KEY `houseId_idx` (`houseId`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `g1t3-aangstay`.`payment` (`paymentId`, `tDate`, `paidAmount`, `status`, `houseId`) VALUES 
 
 -- status: COMPLETED/DECLINED/REFUNDED/FAILED
 ('1', '2023-03-21', '100', 'completed', '1'),
 ('2', '2023-03-21', '150', 'refunded', '3');
+
 
