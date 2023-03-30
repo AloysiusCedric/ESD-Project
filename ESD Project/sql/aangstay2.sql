@@ -22,7 +22,7 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS `g1t3-aangstay` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `g1t3-aangstay`;
 
-CREATE TABLE `house` (
+CREATE TABLE IF NOT EXISTS`house` (
   `houseId` int NOT NULL AUTO_INCREMENT,
   `houseName` varchar(100) NOT NULL,
   `address` varchar(255) NOT NULL,
@@ -50,7 +50,7 @@ INSERT INTO `g1t3-aangstay`.`house` (`houseId`,`houseName`,`address`,`region`,`l
 (11, 'River Vale', '43 Jln Chengkek, Singapore 369266', 'Singapore', 1.3306012861113672, 103.88469366829857,200),
 (12, 'Hill Vale', '35 Jln Tupai, Singapore 249162', 'Singapore', 1.301830541540901, 103.82685763633978,150);
 
-CREATE TABLE `transaction` (
+CREATE TABLE IF NOT EXISTS `transaction` (
   `transactionId` int NOT NULL AUTO_INCREMENT,
   `startDate` date NOT NULL,
   `endDate` date NOT NULL,
@@ -75,11 +75,12 @@ INSERT INTO `g1t3-aangstay`.`transaction` (`startDate`, `endDate`,`status`,`hous
 ('2023-04-10', '2023-04-12','confirmed','6', '7F86A4'),
 ('2023-04-18', '2023-04-20','confirmed',7, 'E85981');
 
-CREATE TABLE `payment` (
+CREATE TABLE IF NOT EXISTS `payment` (
   `paymentId` int NOT NULL,
   `tDate` date NOT NULL,
   `paidAmount` decimal(10,0) NOT NULL,
   `status` varchar(25) NOT NULL,
+  `invoiceId` varchar(100),
   `houseId` int NOT NULL,
   PRIMARY KEY (`paymentId`),
   KEY `houseId_idx` (`houseId`)
