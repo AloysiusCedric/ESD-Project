@@ -75,16 +75,21 @@ INSERT INTO `g1t3-aangstay`.`transaction` (`startDate`, `endDate`,`status`,`hous
 ('2023-04-10', '2023-04-12','confirmed','6', '7F86A4'),
 ('2023-04-18', '2023-04-20','confirmed',7, 'E85981');
 
-CREATE TABLE IF NOT EXISTS `payment` (
-  `paymentId` int NOT NULL,
-  `tDate` date NOT NULL,
-  `paidAmount` decimal(10,0) NOT NULL,
-  `status` varchar(25) NOT NULL,
-  `invoiceId` varchar(100),
-  `houseId` int NOT NULL,
+CREATE TABLE `payment` (
+  `paymentId` INT NOT NULL AUTO_INCREMENT,
+  `tDate` DATE NOT NULL,
+  `paidAmount` DECIMAL(10,0) NOT NULL,
+  `status` VARCHAR(25) NOT NULL,
+  `invoiceId` VARCHAR(100) NULL,
+  `houseId` INT NULL,
+  `transactionId` INT NULL,
   PRIMARY KEY (`paymentId`),
-  KEY `houseId_idx` (`houseId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+  INDEX `transactionId_idx` (`transactionId` ASC) VISIBLE,
+  CONSTRAINT `transactionId`
+    FOREIGN KEY (`transactionId`)
+    REFERENCES `g1t3-aangstay`.`transaction` (`transactionId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION) ENGINE=InnoDB DEFAULT CHARSET= utf8mb4;
 
 INSERT INTO `g1t3-aangstay`.`payment` (`paymentId`, `tDate`, `paidAmount`, `status`, `houseId`) VALUES 
 
