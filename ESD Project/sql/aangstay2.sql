@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS`house` (
   `price` decimal(10,0) NOT NULL,
   PRIMARY KEY (`houseId`),
   UNIQUE KEY `houseId_UNIQUE` (`houseId`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Dumping data for table `house` 
 
@@ -68,14 +68,14 @@ INSERT INTO `g1t3-aangstay`.`transaction` (`transactionId`,`startDate`, `endDate
 ('10000001','2023-04-05', '2023-04-09','confirmed',5,'3FB3B3'); 
 
 INSERT INTO `g1t3-aangstay`.`transaction` (`startDate`, `endDate`,`status`,`houseId`,`bookingNum`) VALUES
-('2023-04-05', '2023-04-09','confirmed',6, '347F50'),
-('2023-04-05', '2023-04-09','confirmed','5', '1CB14F'),
+('2023-04-05', '2023-04-09','confirmed','6', '347F50'),
+('2023-04-05', '2023-04-09','cancelled','5', '1CB14F'),
 ('2023-04-05', '2023-04-09','confirmed','10', 'FE031C'),
 ('2023-04-11', '2023-04-15','confirmed','2', '6A1E0F'),
 ('2023-04-10', '2023-04-12','confirmed','6', '7F86A4'),
-('2023-04-18', '2023-04-20','confirmed',7, 'E85981');
+('2023-04-18', '2023-04-20','confirmed','7', 'E85981');
 
-CREATE TABLE `payment` (
+CREATE TABLE IF NOT EXISTS `payment` (
   `paymentId` INT NOT NULL AUTO_INCREMENT,
   `tDate` DATE NOT NULL,
   `paidAmount` DECIMAL(10,0) NOT NULL,
@@ -88,17 +88,13 @@ CREATE TABLE `payment` (
   INDEX `transactionId_idx` (`transactionId` ASC) VISIBLE,
   CONSTRAINT `housepId`
     FOREIGN KEY (`housepId`)
-    REFERENCES `g1t3-aangstay`.`house` (`houseId`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    REFERENCES `g1t3-aangstay`.`house` (`houseId`),
   CONSTRAINT `transactionId`
     FOREIGN KEY (`transactionId`)
-    REFERENCES `g1t3-aangstay`.`transaction` (`transactionId`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION) ENGINE=InnoDB DEFAULT CHARSET= utf8mb4;
+    REFERENCES `g1t3-aangstay`.`transaction` (`transactionId`)) 
+    ENGINE=InnoDB DEFAULT CHARSET= utf8mb4;
 
-INSERT INTO `g1t3-aangstay`.`payment` (`paymentId`, `tDate`, `paidAmount`, `status`, `housepId`) VALUES 
-
+INSERT INTO `g1t3-aangstay`.`payment` (`paymentId`, `tDate`, `paidAmount`, `status`, `housepId`,`transactionId`) VALUES 
 -- status: COMPLETED/DECLINED/REFUNDED/FAILED
-('1', '2023-03-21', '100', 'completed', '1'),
-('2', '2023-03-21', '150', 'refunded', '3');
+('1', '2023-03-21', '100', 'COMPLETED', 1,10000001),
+('2', '2023-03-21', '150', 'REFUNDED', 3,10000002);
