@@ -78,7 +78,7 @@ def add_transaction():
     startDate = datetime.datetime.fromisoformat(data['startDate'])
     endDate = datetime.datetime.fromisoformat(data['endDate'])
     status = data['status']
-    bookingNum = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    bookingNum = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
     new_transaction = Transaction(
         transactionId=transactionId,
@@ -109,4 +109,4 @@ def cancel_transaction(bookingNum):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0',port=5001, debug=True)
