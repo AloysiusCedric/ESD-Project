@@ -8,8 +8,7 @@ port = 5672 # default port
 # connect to the broker and set up a communication channel in the connection
 connection = pika.BlockingConnection(
     pika.ConnectionParameters(
-        host=hostname, port=port,
-        heartbeat=3600, blocked_connection_timeout=3600, # these parameters to prolong the expiration time (in seconds) of the connection
+        host=hostname, port=port # these parameters to prolong the expiration time (in seconds) of the connection
 ))
     # Note about AMQP connection: various network firewalls, filters, gateways (e.g., SMU VPN on wifi), may hinder the connections;
     # If "pika.exceptions.AMQPConnectionError" happens, may try again after disconnecting the wifi and/or disabling firewalls.
@@ -46,7 +45,7 @@ channel.queue_declare(queue=queue_name, durable=True)
     # 'durable' makes the queue survive broker restarts
 
 #bind Activity_Log queue
-channel.queue_bind(exchange=exchangename, queue=queue_name, routing_key='#') 
+channel.queue_bind(exchange=exchangename, queue=queue_name, routing_key='*.activity') 
     # bind the queue to the exchange via the key
     # 'routing_key=#' => any routing_key would be matched
 
