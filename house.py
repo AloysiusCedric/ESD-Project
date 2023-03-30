@@ -33,9 +33,27 @@ class House(db.Model):
     def json(self):
         return {"houseID": self.houseID, "houseName": self.houseName, "address": self.address, "region": self.region, "latitude": self.latitude, "longitude": self.longitude, "price": self.price}
 
+@app.route("/house")
+def get_all_houses():
+    houselist = House.query.all()
+    if len(houselist):
+        return jsonify(
+            {
+                "code": 200,
+                "data": {
+                    "House list": [house.json() for house in houselist]
+                }
+            }
+        )
+    return jsonify(
+        {
+            "code": 404,
+            "message": "There are no available houses."
+        }
+    ), 404
 
 @app.route("/confirmation" , methods=['GET'])
-def get_all():
+def get_houseId():
     houselist = House.query.all()
     if request.is_json:
         order = request.get_json()
@@ -49,7 +67,7 @@ def get_all():
                         # make the data string as we dunno what could be the actual format
                         "data": str(data),
                         "message": "Order should be in JSON."}), 400  # Bad Request input
-
+    
 def processOrder(order):
     print("Processing an order for shipping:")
     print(order)
@@ -74,24 +92,6 @@ def processOrder(order):
     }
 
 
-@app.route("/house")
-def get_all():
-    houselist = House.query.all()
-    if len(houselist):
-        return jsonify(
-            {
-                "code": 200,
-                "data": {
-                    "House list": [house.json() for house in houselist]
-                }
-            }
-        )
-    return jsonify(
-        {
-            "code": 404,
-            "message": "There are no available houses."
-        }
-    ), 404
 
 
 #@app.route("/house/string:<")
