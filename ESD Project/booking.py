@@ -27,7 +27,6 @@ def checkAvailability():
     if request.is_json:
         try:
             toCheck = request.get_json()
-            toCheck = jsonify(toCheck)
             print("Receive an input from user for checking booking MS", toCheck)
 
             #do the actual work
