@@ -81,17 +81,23 @@ CREATE TABLE `payment` (
   `paidAmount` DECIMAL(10,0) NOT NULL,
   `status` VARCHAR(25) NOT NULL,
   `invoiceId` VARCHAR(100) NULL,
-  `houseId` INT NULL,
+  `housepId` INT NULL,
   `transactionId` INT NULL,
   PRIMARY KEY (`paymentId`),
+  INDEX `houseId_idx` (`housepId` ASC) VISIBLE,
   INDEX `transactionId_idx` (`transactionId` ASC) VISIBLE,
+  CONSTRAINT `housepId`
+    FOREIGN KEY (`housepId`)
+    REFERENCES `g1t3-aangstay`.`house` (`houseId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
   CONSTRAINT `transactionId`
     FOREIGN KEY (`transactionId`)
     REFERENCES `g1t3-aangstay`.`transaction` (`transactionId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION) ENGINE=InnoDB DEFAULT CHARSET= utf8mb4;
 
-INSERT INTO `g1t3-aangstay`.`payment` (`paymentId`, `tDate`, `paidAmount`, `status`, `houseId`) VALUES 
+INSERT INTO `g1t3-aangstay`.`payment` (`paymentId`, `tDate`, `paidAmount`, `status`, `housepId`) VALUES 
 
 -- status: COMPLETED/DECLINED/REFUNDED/FAILED
 ('1', '2023-03-21', '100', 'completed', '1'),
