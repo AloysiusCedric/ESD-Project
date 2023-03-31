@@ -35,8 +35,8 @@ def checkAvailability():
 
             #do the actual work
             #1. Send user input {check in date, check out date, region}
-
             result = checkTransaction(toCheck)
+
             return jsonify(result), result["code"]
 
         except Exception as e:
@@ -67,7 +67,11 @@ def checkTransaction(toCheck):
     print('\n-----Invoking transaction microservice-----')
     transaction_result = invoke_http(transaction_URL, method='POST', json=toCheck)
     print('result:', transaction_result)
-  
+
+    
+
+    # uncomment the line below for testing transaction
+    # return transaction_result
 
     # Check the transaction result; if a failure, send it to the error microservice.
     code = transaction_result["code"]
@@ -76,10 +80,10 @@ def checkTransaction(toCheck):
     if code not in range(200, 300):
         # Inform the error microservice
         #print('\n\n-----Invoking error microservice as order fails-----')
-        print('\n\n-----Publishing the (checking error) message with routing_key=order.error-----')
+        print('\n\n-----Publishing the (checking error) message with routing_key=checking.error-----')
 
         # invoke_http(error_URL, method="POST", json=order_result)
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="transaction.error", 
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.error", 
             body=message, properties=pika.BasicProperties(delivery_mode = 2)) 
         # make message persistent within the matching queues until it is received by some receiver 
         # (the matching queues have to exist and be durable and bound to the exchange)
@@ -105,11 +109,13 @@ def checkTransaction(toCheck):
         # 4. Record new order
         # record the activity log anyway
         #print('\n\n-----Invoking activity_log microservice-----')
-        print('\n\n-----Publishing the (order info) message with routing_key=order.info-----')        
+        print('\n\n-----Publishing the (checking info) message with routing_key=checking.info-----')      
+        print("hello world")  
 
         # invoke_http(activity_log_URL, method="POST", json=order_result)            
         amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checkTransaction.activity",  
-            body= transaction_result)
+            body= message)
+        print("hello world")
     
     print("\nOrder published to RabbitMQ Exchange.\n")
     # - reply from the invocation is not used;
@@ -119,9 +125,12 @@ def checkTransaction(toCheck):
     # 5. Send transaction details to house MS
     # Invoke the house microservice
     print('\n\n-----Invoking house microservice-----')    
+
+    # uncomment the line below to test
+    # return transaction_result
     
     house_result = invoke_http(
-        house_record_URL, method="POST", json=transaction_result['data'])
+        house_record_URL, method="POST", json=transaction_result["data"])
     print("transaction result", house_result, '\n')
 
     # Check the shipping result;
@@ -150,7 +159,7 @@ def checkTransaction(toCheck):
             "message": "House record error sent for error handling."
         }
 
-    # 7. Return JSON body with transaction result and house result, shipping record
+    # 7. Return JSON body with transaction result and house result
     # Use the house result and process the house ID to display all the house information and picture
     return {
         "code": 201,

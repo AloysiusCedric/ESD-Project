@@ -35,7 +35,9 @@ class House(db.Model):
 @app.route("/house_record", methods=['POST'])
 def get_houseId():
     if request.is_json:
-        houseIds = request.json['houseId'].split(',')
+        houseIds = request.get_json()
+        print(houseIds)
+        # houseIds = request.json['data'].split(',')
         houses_data = []
         for houseId in houseIds:
             # Check if the houseId is valid

@@ -5,7 +5,10 @@ import calendar
 import string
 import random
 
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -20,9 +23,10 @@ class Transaction(db.Model):
     paymentId = db.Column(db.String, nullable=False)
 
 
-@app.route('/transaction', methods=['GET'])
+@app.route('/transaction_record', methods=['POST'])
 def get_current_month_transactions():
     data = request.get_json()
+    print("Receive an input from user for checking booking MS", data)
     start_date_str = data.get('startDate')
     end_date_str = data.get('endDate')
     if start_date_str and end_date_str:
@@ -60,7 +64,7 @@ def get_current_month_transactions():
 
 
 
-@app.route('/transaction', methods=['POST'])
+@app.route('/transaction', methods=['GET'])
 def add_transaction():
     data = request.get_json()
     transactionId = data['transactionId']
