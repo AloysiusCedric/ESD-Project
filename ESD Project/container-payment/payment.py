@@ -20,70 +20,80 @@ db = SQLAlchemy(app)
 
 class Payment(db.Model):
     __tablename__ = 'payment'
-    paymentId = db.Column(db.Integer,primary_key = True)
+    paymentId = db.Column(db.String(64),primary_key = True)
     tDate = db.Column(db.Date, nullable=True)
     paidAmount = db.Column(db.Float(precision=2), nullable=False)
     status = db.Column(db.String(64), nullable=False)
-    invoiceId = db.Column(db.String(64), nullable=False)
     housepId = db.Column(db.Integer, nullable=False)
 
-    def __init__(self,paidAmount, status, tDate, invoiceId, housepId):
+    def __init__(self,paymentId, paidAmount, status, tDate, housepId):
+        self.paymentId = paymentId
         self.paidAmount = paidAmount
         self.status = status
         self.tDate = tDate
-        self.invoiceId = invoiceId
         self.housepId = housepId
  
     def json(self):
-        return {"tDate": self.tDate, "paidAmount": self.paidAmount, "status": self.status, "invoiceId": self.invoiceId, "housepId": self.housepId}
+        return {"paymentId": self.paymentId, "tDate": self.tDate, "paidAmount": self.paidAmount, "status": self.status, "housepId": self.housepId}
 
 #create entry in payment db
 @app.route('/payment', methods=['POST'])
 def payment_to_db():
-    data = request.json
+    data = request.get_json()
     status = data['status']
-    if (status == 'confirmed'):
+    if (status == 'CONFIRMED'):
         tDate = datetime.datetime.strptime(data['tDate'], '%Y-%m-%dT%H:%M:%S')
+        paymentId = data['paymentId']
         housepId = data['housepId']
         paidAmount = data['paidAmount']
-        invoiceId = data['invoiceId']
-        newPayment = Payment(tDate = tDate, paidAmount = paidAmount, status = status, invoiceId = invoiceId, housepId = housepId)
+        newPayment = Payment(paymentId = paymentId, tDate = tDate, paidAmount = paidAmount, status = status, housepId = housepId)
         db.session.add(newPayment)
         db.session.commit()
         result = {'message': 'New Entry created successfully!'}
     else:
-        result = {'message' : 'Transaction with invoiceId {invoiceId} is not confirmed! '}
-    
+        result = {'message' : 'Transaction with paymentId '+paymentId+ 'is not confirmed!'}
     return jsonify(result)
 
 #change status from "confirmed" to "refunded"
-@app.route('/payment/<string:invoiceId>', methods=['POST'])
-def refund(invoiceId):
-    payment = Payment.query.filter_by(invoiceId = invoiceId).first()
+@app.route('/payment/refund', methods=['POST'])
+def refund():
+    data = request.get_json()
+    paymentId = data['paymentId']
+    payment = Payment.query.filter_by(paymentId=paymentId).first()
     if payment:
-        # Update payment status to refunded
-        payment.status = 'refunded'
-        db.session.commit()
-        # Return message with payment details
-        result = {'payment': payment.json()}
-        return jsonify(result)
+        # Create a refund transaction using the PayPal SDK
+        refund = paypalrestsdk.Refund({
+            "amount": {
+                "total": payment.paidAmount
+            }
+        })
+        if refund.create(payment.paymentId):
+            # Update payment status to refunded
+            payment.status = 'REFUNDED'
+            db.session.commit()
+            # Return message with payment details
+            result = {'payment': payment.json(), 'message': 'Refund successful'}
+            return jsonify(result), 200
+        else:
+            result = {'message': 'Failed to create refund transaction'}
+            return jsonify(result), 500
     else:
-        result = {'message': f'Transaction with invoiceId {invoiceId} not found in the database.'}
+        result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
         return jsonify(result), 404
 
+
 #refund completed, return status completed to booking complex microservice
-@app.route('/payment/<string:invoiceId>/complete', methods=['POST'])
-def complete(invoiceId):
-    payment = Payment.query.filter_by(invoiceId = invoiceId).first()
+@app.route('/payment/<string:paymentId>/complete', methods=['POST'])
+def complete(paymentId):
+    payment = Payment.query.filter_by(paymentId = paymentId).first()
     if payment:
-        # change status if refund complete? 
-        # payment.status = 'completed'
+        payment.status = 'COMPLETED'
         db.session.commit()
-        result = {'message': f'Transaction with invoiceId {invoiceId} has been refunded.'}
+        result = {'message': f'Transaction with paymentId {paymentId} has been refunded.'}
         return jsonify(result)
     else:
-        result = {'message': f'Transaction with invoiceId {invoiceId} not found in the database.'}
+        result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
         return jsonify(result), 404
-    
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port = 5002, debug=True)
