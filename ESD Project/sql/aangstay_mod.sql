@@ -51,7 +51,7 @@ INSERT INTO `g1t3-aangstay`.`house` (`houseId`,`houseName`,`address`,`latitude`,
 (12, 'Hill Vale', '35 Jln Tupai, Singapore 249162', 1.301830541540901, 103.82685763633978,150);
 
 -- payment
--- Note: transactionId = transactionId from PayPal
+-- Note: paymentId = transactionId from PayPal
 CREATE TABLE IF NOT EXISTS `g1t3-aangstay`.`payment` (
   `paymentId` NVARCHAR(18) NOT NULL,
   `tDate` DATE NOT NULL,
