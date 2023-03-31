@@ -17,11 +17,12 @@ class Transaction(db.Model):
     status = db.Column(db.String, nullable=False)
     houseId = db.Column(db.Integer, nullable=False)
     bookingNum = db.Column(db.String, nullable=False)
+    paymentId = db.Column(db.String, nullable=False)
 
 
 @app.route('/transaction', methods=['GET'])
 def get_current_month_transactions():
-    data = request.json
+    data = request.get_json()
     start_date_str = data.get('startDate')
     end_date_str = data.get('endDate')
     if start_date_str and end_date_str:
@@ -88,13 +89,14 @@ def get_current_month_transactions():
 
 @app.route('/transaction', methods=['POST'])
 def add_transaction():
-    data = request.json
+    data = request.get_json()
     transactionId = data['transactionId']
     houseId = data['houseId']
     startDate = datetime.datetime.fromisoformat(data['startDate'])
     endDate = datetime.datetime.fromisoformat(data['endDate'])
     status = data['status']
     bookingNum = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    paymentId = data['paymentId']
 
     if status == "confirmed":
         new_transaction = Transaction(
@@ -103,7 +105,8 @@ def add_transaction():
             startDate=startDate,
             endDate=endDate,
             status=status,
-            bookingNum=bookingNum
+            bookingNum=bookingNum,
+            paymentId = paymentId
         )
         db.session.add(new_transaction)
         db.session.commit()
@@ -122,7 +125,7 @@ def cancel_transaction(bookingNum):
     if transaction:
         transaction.status = 'cancelled'
         db.session.commit()
-        result = {'message': f'Transaction with bookingNum {bookingNum} has been cancelled.', 'transactionId': transaction.transactionId}
+        result = {'message': f'Transaction with bookingNum {bookingNum} has been cancelled.', 'paymentId': transaction.paymentId}
         return jsonify(result)
     else:   
         result = {'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
