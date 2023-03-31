@@ -78,7 +78,14 @@
     document.getElementById("submit").addEventListener("click", function() {
       var sDate = document.getElementById("sDate").value
       var eDate = document.getElementById("eDate").value
-      console.log (eDate, sDate)
+
+      dict = { "startDate" :sDate, 
+                "endDate":eDate
+            }
+      dict = JSON.stringify(dict)
+      console.log(typeof(dict))
+      console.log(JSON.stringify(dict))
+
 
     });
 
