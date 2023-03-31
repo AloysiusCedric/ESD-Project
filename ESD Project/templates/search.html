@@ -194,33 +194,6 @@
   };
 
   console.log(dict);
-    function displayHouse() {
-                    fetch('http://127.0.0.1:5003/house_record', {
-                    method: 'POST',
-                    headers:{
-                                "Content-Type" : "application/json"
-                            },
-                    body: JSON.stringify({
-                                            "houseId": "5"
-                                        })
-                            })
-        .then(response => {
-        // If the response is not ok, log an error message and return
-        if (!response.ok) {
-            console.log('Error retrieving housing data');
-            return;
-        }
-        // Parse the response as JSON
-        response.json().then(data => {
-            // Convert the housing data to a string and encode it as base64
-            const housesData = btoa(JSON.stringify(data));
-            console.log(housesData);
-            const url = `display.html?housesData=${housesData}`;
-            setTimeout(function() {
-              window.location.href = url;
-            }, 1000);
-        });
-      }
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vb26e4fa9e5134444860be286fd8771851679335129114" integrity="sha512-M3hN/6cva/SjwrOtyXeUa5IuCT0sedyfT+jK/OV+s+D0RnzrTfwjwJHhd+wYfMm9HJSrZ1IKksOdddLuN6KOzw==" data-cf-beacon='{"rayId":"7ae164b00aa82e9b","token":"cd0b4b3a733644fc843ef0b185f98241","version":"2023.3.0","si":100}' crossorigin="anonymous"></script>
 
