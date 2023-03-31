@@ -33,10 +33,8 @@ def get_current_month_transactions():
         start_date = datetime.date(today.year, today.month, 1)
         end_date = datetime.date(today.year, today.month, calendar.monthrange(today.year, today.month)[1])
         
-    unavailable_house_ids = []
-    month_name = calendar.month_name[start_date.month]
-    date_range_str = f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
-    
+    available_house_ids = []
+
     transactions = Transaction.query.filter(
         Transaction.status == "confirmed",
         ((Transaction.startDate <= start_date) & (Transaction.endDate >= end_date)) |
@@ -50,10 +48,10 @@ def get_current_month_transactions():
                 if (transaction.startDate <= end_date) and (transaction.endDate >= start_date):
                     overlapping = True
                     break
-        if overlapping:
-            unavailable_house_ids.append(house_id)
+        if not overlapping:
+            available_house_ids.append(house_id)
 
-    return jsonify({"filter_date": date_range_str, "unavailable houses": unavailable_house_ids})
+    return jsonify({"Available houses": available_house_ids})
 
 
 
