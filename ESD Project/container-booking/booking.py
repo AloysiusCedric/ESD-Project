@@ -19,8 +19,8 @@ CORS(app)
 
 
 transaction_URL = "http://localhost:5001/transaction_record" #Used for checking transaction to search a stay
-create_transaction_URL="http://localhost:5001/create_transaction" #Used for creating entry in transaction MS when user pays
-payment_URL = "http://localhost:5002/create" #Used for creating entry in payment MS when user pays
+create_transaction_URL="http://localhost:5001/transaction" #Used for creating entry in transaction MS when user pays
+payment_URL = "http://localhost:5002/payment" #Used for creating entry in payment MS when user pays
 house_record_URL = "http://localhost:5003/house_record" #Used to send houseID from transaction then get back infromation of houses when user search for a stay
 
 
@@ -199,7 +199,7 @@ def storeDetails(toPass):
     # 3. Send the transaction info {status, transactionID, houseID}
     # Invoke the payment microservice
     print('\n-----Invoking payment microservice-----')
-    payment_result = invoke_http(transaction_URL, method='POST', json=toPass)
+    payment_result = invoke_http(payment_URL, method='POST', json=toPass)
     print('result:', payment_result)
   
 
@@ -212,7 +212,7 @@ def storeDetails(toPass):
         print('\n\n-----Publishing the (payment error) message with routing_key=payment.error-----')
 
         #Publish message to AMQP broker
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="transaction.error", 
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="payment.error", 
             body=message, properties=pika.BasicProperties(delivery_mode = 2)) 
         # make message persistent within the matching queues until it is received by some receiver 
         # (the matching queues have to exist and be durable and bound to the exchange)
