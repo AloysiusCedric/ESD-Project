@@ -34,7 +34,7 @@ def get_current_month_transactions():
         end_date = datetime.date(today.year, today.month, calendar.monthrange(today.year, today.month)[1])
         
     available_house_ids = []
-
+    
     transactions = Transaction.query.filter(
         Transaction.status == "confirmed",
         ((Transaction.startDate <= start_date) & (Transaction.endDate >= end_date)) |
@@ -50,9 +50,13 @@ def get_current_month_transactions():
                     break
         if not overlapping:
             available_house_ids.append(house_id)
-
-    return jsonify({"Available houses": available_house_ids})
-
+    if len(available_house_ids) != 0 :
+        return jsonify({"code":200,
+                    "data": available_house_ids,
+                    "message": "Available Houses houseids successfully returned."})
+    else :
+        return jsonify({"code":200,
+                    "message": "There are no available houses houseids"})
 
 
 
@@ -80,11 +84,11 @@ def add_transaction():
         db.session.add(new_transaction)
         db.session.commit()
 
-        result = {'Message': 'New entry created successfully!', 'bookingNum':bookingNum}
+        result = {"code":200,'Message': 'New entry created successfully!', 'bookingNum':bookingNum}
         return jsonify(result)
     else:
-        result = {'Message': 'Transaction status must be confirmed'}
-        return jsonify(result), 400
+        result = {"code":400,'Message': 'Transaction status must be confirmed'}
+        return jsonify(result)
 
 
 @app.route('/transaction/<string:bookingNum>/cancel', methods=['POST'])
@@ -94,11 +98,13 @@ def cancel_transaction(bookingNum):
     if transaction:
         transaction.status = 'cancelled'
         db.session.commit()
-        result = {'message': f'Transaction with bookingNum {bookingNum} has been cancelled.', 'paymentId': transaction.paymentId}
+        result = {"code":200,
+                    'message': f'Transaction with bookingNum {bookingNum} has been cancelled.',
+                   'paymentId': transaction.paymentId}
         return jsonify(result)
     else:   
-        result = {'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
-        return jsonify(result), 404
+        result = {"code":404,'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
+        return jsonify(result)
 
 
 
