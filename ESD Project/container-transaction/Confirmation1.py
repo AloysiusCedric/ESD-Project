@@ -34,7 +34,7 @@ def get_current_month_transactions():
         end_date = datetime.date(today.year, today.month, calendar.monthrange(today.year, today.month)[1])
         
     available_house_ids = []
-
+    
     transactions = Transaction.query.filter(
         Transaction.status == "confirmed",
         ((Transaction.startDate <= start_date) & (Transaction.endDate >= end_date)) |
@@ -50,9 +50,13 @@ def get_current_month_transactions():
                     break
         if not overlapping:
             available_house_ids.append(house_id)
-
-    return jsonify({"Available houses": available_house_ids})
-
+    if len(available_house_ids) != 0 :
+        return jsonify({"code":200,
+                    "data": available_house_ids,
+                    "message": "Available Houses houseids successfully returned."})
+    else :
+        return jsonify({"code":200,
+                    "message": "There are no available houses houseids"})
 
 
 
