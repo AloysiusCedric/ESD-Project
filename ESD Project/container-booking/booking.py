@@ -23,6 +23,8 @@ create_transaction_URL="http://localhost:5001/create_transaction" #Used for crea
 payment_URL = "http://localhost:5002/create" #Used for creating entry in payment MS when user pays
 house_record_URL = "http://localhost:5003/house_record" #Used to send houseID from transaction then get back infromation of houses when user search for a stay
 
+
+##Search for a stay scenario
 @app.route("/search", methods=['POST'])
 def checkAvailability():
     # Simple check of input format and data of the request are JSON
@@ -158,6 +160,7 @@ def checkTransaction(toCheck):
         }
     }
 
+##Make payment scenario
 @app.route("/pay", methods=['POST'])
 def payment():
     # Simple check of input format and data of the request are JSON
