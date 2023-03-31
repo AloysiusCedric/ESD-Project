@@ -84,11 +84,11 @@ def add_transaction():
         db.session.add(new_transaction)
         db.session.commit()
 
-        result = {'Message': 'New entry created successfully!', 'bookingNum':bookingNum}
+        result = {"code":200,'Message': 'New entry created successfully!', 'bookingNum':bookingNum}
         return jsonify(result)
     else:
-        result = {'Message': 'Transaction status must be confirmed'}
-        return jsonify(result), 400
+        result = {"code":400,'Message': 'Transaction status must be confirmed'}
+        return jsonify(result)
 
 
 @app.route('/transaction/<string:bookingNum>/cancel', methods=['POST'])
@@ -98,11 +98,13 @@ def cancel_transaction(bookingNum):
     if transaction:
         transaction.status = 'cancelled'
         db.session.commit()
-        result = {'message': f'Transaction with bookingNum {bookingNum} has been cancelled.', 'paymentId': transaction.paymentId}
+        result = {"code":200,
+                    'message': f'Transaction with bookingNum {bookingNum} has been cancelled.',
+                   'paymentId': transaction.paymentId}
         return jsonify(result)
     else:   
-        result = {'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
-        return jsonify(result), 404
+        result = {"code":404,'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
+        return jsonify(result)
 
 
 
