@@ -15,24 +15,22 @@ class House(db.Model):
     houseId = db.Column(db.Integer, primary_key=True)
     houseName = db.Column(db.String(64), nullable=False)
     address = db.Column(db.String(255), nullable=False)
-    region = db.Column(db.String(50), nullable=False)
     latitude = db.Column(db.Float(11,8), nullable=False)
     longitude = db.Column(db.Float(12,8), nullable=False)   
     price = db.Column(db.Float(10,0), nullable=False)
 
 
-    def __init__(self, houseId, houseName, address, region, latitude, longitude, price):
+    def __init__(self, houseId, houseName, address, latitude, longitude, price):
         self.houseId = houseId
         self.houseName = houseName
         self.address = address
-        self.region = region
         self.latitude = latitude
         self. longitude = longitude
         self.price = price
 
 
     def json(self):
-        return {"houseId": self.houseId, "houseName": self.houseName, "address": self.address, "region": self.region, "latitude": self.latitude, "longitude": self.longitude, "price": self.price}
+        return {"houseId": self.houseId, "houseName": self.houseName, "address": self.address, "latitude": self.latitude, "longitude": self.longitude, "price": self.price}
 
 @app.route("/house_record", methods=['POST'])
 def get_houseId():
