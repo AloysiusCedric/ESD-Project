@@ -30,8 +30,7 @@
             width: 100%;
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key=AIzaSyC7FfBkqplq2aBVbZafCazFhUpny7Lx048"
-    async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key=AIzaSyC7FfBkqplq2aBVbZafCazFhUpny7Lx048"async defer></script>
     <script>
         console.log(JSON.parse(sessionStorage.getItem("houses")))
          // Initialize and add the map
@@ -59,12 +58,13 @@
                 var marker = new google.maps.Marker({
                 position: coords,
                 map: map,
-                title: "Hello World!",
+                icon: "../assets/images/icon.png",
             });
 
             }
             }
     </script>
+    <meta http-equiv="refresh">
 </head>
 <header>
 
