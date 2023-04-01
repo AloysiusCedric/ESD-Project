@@ -118,7 +118,7 @@ def checkTransaction(toCheck):
         #     body=message, properties=pika.BasicProperties(delivery_mode = 2))
         
         # There is an error with the code below that cause the stream error         
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.info",  
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.notification",  
             body= message)
         print("hello world")
     
