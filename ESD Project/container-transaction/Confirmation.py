@@ -5,7 +5,10 @@ import calendar
 import string
 import random
 
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -20,9 +23,10 @@ class Transaction(db.Model):
     paymentId = db.Column(db.String, nullable=False)
 
 
-@app.route('/transaction', methods=['GET'])
+@app.route('/transaction_record', methods=['POST'])
 def get_current_month_transactions():
     data = request.get_json()
+    print("Receive an input from user for checking booking MS", data)
     start_date_str = data.get('startDate')
     end_date_str = data.get('endDate')
     if start_date_str and end_date_str:
@@ -33,61 +37,34 @@ def get_current_month_transactions():
         start_date = datetime.date(today.year, today.month, 1)
         end_date = datetime.date(today.year, today.month, calendar.monthrange(today.year, today.month)[1])
         
-    unavailable_dates = {}
-    house_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-    for i in range(3):
-        current_month = start_date.month + i
-        current_year = start_date.year
-        if current_month > 12:
-            current_month -= 12
-            current_year += 1
-        month_name = calendar.month_name[current_month]
-        first_day_of_month = datetime.date(current_year, current_month, 1)
-        last_day_of_month = datetime.date(current_year, current_month, calendar.monthrange(current_year, current_month)[1])
-        transactions = Transaction.query.filter(
-            Transaction.status == "confirmed",
-            ((Transaction.startDate <= first_day_of_month) & (Transaction.endDate >= last_day_of_month)) |
-            ((Transaction.startDate >= first_day_of_month) & (Transaction.startDate <= last_day_of_month)) |
-            ((Transaction.endDate >= first_day_of_month) & (Transaction.endDate <= last_day_of_month))
-        ).all()
-        unavailable_dates[month_name] = {}
-        for house_id in house_ids:
-            unavailable_dates[month_name][house_id] = []
-            unavailable_start_date = None
-            unavailable_end_date = None
-            for day in range(calendar.monthrange(current_year, current_month)[1]):
-                date = datetime.date(current_year, current_month, day + 1)
-                overlapping = False
-                for transaction in transactions:
-                    if transaction.houseId == house_id:
-                        if transaction.startDate <= date <= transaction.endDate:
-                            overlapping = True
-                            break
-                if overlapping:
-                    if unavailable_start_date is None:
-                        unavailable_start_date = date
-                    unavailable_end_date = date
-                else:
-                    if unavailable_start_date is not None and unavailable_end_date is not None:
-                        if end_date >= unavailable_start_date and start_date <= unavailable_end_date:
-                            unavailable_dates[month_name][house_id].append(
-                                f"{unavailable_start_date.strftime('%Y-%m-%d')} - {unavailable_end_date.strftime('%Y-%m-%d')}"
-                            )
-                        unavailable_start_date = None
-                        unavailable_end_date = None
-            if unavailable_start_date is not None and unavailable_end_date is not None:
-                if end_date >= unavailable_start_date and start_date <= unavailable_end_date:
-                    unavailable_dates[month_name][house_id].append(
-                        f"{unavailable_start_date.strftime('%Y-%m-%d')} - {unavailable_end_date.strftime('%Y-%m-%d')}"
-                    )
-
-    sorted_unavailable_dates = dict(sorted(unavailable_dates.items(), key=lambda x: datetime.datetime.strptime(x[0], "%B")))
-    return jsonify(sorted_unavailable_dates)
+    available_house_ids = []
+    
+    transactions = Transaction.query.filter(
+        Transaction.status == "confirmed",
+        ((Transaction.startDate <= start_date) & (Transaction.endDate >= end_date)) |
+        ((Transaction.startDate >= start_date) & (Transaction.startDate <= end_date)) |
+        ((Transaction.endDate >= start_date) & (Transaction.endDate <= end_date))
+    ).all()
+    for house_id in range(1, 13):
+        overlapping = False
+        for transaction in transactions:
+            if transaction.houseId == house_id:
+                if (transaction.startDate <= end_date) and (transaction.endDate >= start_date):
+                    overlapping = True
+                    break
+        if not overlapping:
+            available_house_ids.append(house_id)
+    if len(available_house_ids) != 0 :
+        return jsonify({"code":200,
+                    "data": available_house_ids,
+                    "message": "Available Houses houseids successfully returned."})
+    else :
+        return jsonify({"code":200,
+                    "message": "There are no available houses houseids"})
 
 
 
-
-@app.route('/transaction', methods=['POST'])
+@app.route('/transaction', methods=['GET'])
 def add_transaction():
     data = request.get_json()
     transactionId = data['transactionId']
@@ -111,11 +88,11 @@ def add_transaction():
         db.session.add(new_transaction)
         db.session.commit()
 
-        result = {'Message': 'New entry created successfully!', 'bookingNum':bookingNum}
+        result = {"code":200,'Message': 'New entry created successfully!', 'bookingNum':bookingNum}
         return jsonify(result)
     else:
-        result = {'Message': 'Transaction status must be confirmed'}
-        return jsonify(result), 400
+        result = {"code":400,'Message': 'Transaction status must be confirmed'}
+        return jsonify(result)
 
 
 @app.route('/transaction/<string:bookingNum>/cancel', methods=['POST'])
@@ -125,11 +102,13 @@ def cancel_transaction(bookingNum):
     if transaction:
         transaction.status = 'cancelled'
         db.session.commit()
-        result = {'message': f'Transaction with bookingNum {bookingNum} has been cancelled.', 'paymentId': transaction.paymentId}
+        result = {"code":200,
+                    'message': f'Transaction with bookingNum {bookingNum} has been cancelled.',
+                   'paymentId': transaction.paymentId}
         return jsonify(result)
     else:   
-        result = {'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
-        return jsonify(result), 404
+        result = {"code":404,'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
+        return jsonify(result)
 
 
 
