@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
+import json
 
 paypalrestsdk.configure({
     "mode": "sandbox", # replace with "live" for production environment
@@ -55,45 +56,50 @@ def payment_to_db():
     return jsonify(result)
 
 #change status from "confirmed" to "refunded"
-@app.route('/payment/refund', methods=['POST'])
+@app.route('/refund', methods=['POST'])
 def refund():
     data = request.get_json()
     paymentId = data['paymentId']
+    accessToken = data['accessToken']
     payment = Payment.query.filter_by(paymentId=paymentId).first()
     if payment:
-        # Create a refund transaction using the PayPal SDK
-        refund = paypalrestsdk.Refund({
-            "amount": {
-                "total": payment.paidAmount
+        if payment.status == "CONFIRMED":
+            # Construct the PayPal API endpoint URL
+            url = f"https://api-m.sandbox.paypal.com/v2/payments/captures/{paymentId}/refund"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {accessToken}"
             }
-        })
-        if refund.create(payment.paymentId):
-            # Update payment status to refunded
-            payment.status = 'REFUNDED'
-            db.session.commit()
-            # Return message with payment details
-            result = {'payment': payment.json(), 'message': 'Refund successful'}
-            return jsonify(result), 200
+            body = {}
+            response = requests.post(url, headers=headers, json=body)
+            data = response.json()
+            if data['status'] =='COMPLETED':
+                payment.status = 'REFUNDED'
+                db.session.commit()
+                result = {'payment': payment.json(), 'message': 'Refund successful'}
+                return jsonify(result), 200
+            else:
+                result = {'message': 'Failed to create refund transaction'}
+                return jsonify(result), 500
         else:
-            result = {'message': 'Failed to create refund transaction'}
-            return jsonify(result), 500
+            result = {'message': 'Payment status is not CONFIRMED'}
+            return jsonify(result), 400
     else:
         result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
         return jsonify(result), 404
 
-
-#refund completed, return status completed to booking complex microservice
-@app.route('/payment/<string:paymentId>/complete', methods=['POST'])
-def complete(paymentId):
-    payment = Payment.query.filter_by(paymentId = paymentId).first()
-    if payment:
-        payment.status = 'COMPLETED'
-        db.session.commit()
-        result = {'message': f'Transaction with paymentId {paymentId} has been refunded.'}
-        return jsonify(result)
-    else:
-        result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
-        return jsonify(result), 404
+# #refund completed, return status completed to booking complex microservice
+# @app.route('/payment/<string:paymentId>/complete', methods=['POST'])
+# def complete(paymentId):
+#     payment = Payment.query.filter_by(paymentId = paymentId).first()
+#     if payment:
+#         payment.status = 'COMPLETED'
+#         db.session.commit()
+#         result = {'message': f'Transaction with paymentId {paymentId} has been refunded.'}
+#         return jsonify(result)
+#     else:
+#         result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
+#         return jsonify(result), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port = 5002, debug=True)
