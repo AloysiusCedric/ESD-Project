@@ -242,7 +242,9 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
 
     <script>
-        console.log(sessionStorage.getItem("houses"))
+        console.log(sessionStorage.getItem("startDate")),
+        console.log(sessionStorage.getItem("endDate"))
+        console.log(sessionStorage.getItem("houses"))   
         houses = JSON.parse(sessionStorage.getItem("houses"))
         for (index in houses) {
             console.log(houses[index].address)

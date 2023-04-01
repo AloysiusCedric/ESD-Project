@@ -132,10 +132,7 @@
                                     break;
                                 case 400:
                                 case 500:
-                                    this.addBookError = data.message;
-                                    break;
-                                default:
-                                    throw `${data.code}: ${data.message}`;
+                                    alert("Returned error");
                             }
                         })
   
