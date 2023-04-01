@@ -1,58 +1,119 @@
 <html>
-    
-    <head>
-        <link rel="stylesheet" href="../static/css/indexCSS.css">
-        
-        <!-- Bootstrap CSS -->
-        <link type="text/css" rel="stylesheet" href="../static/css/bootstrap.min.css" />
 
-        <!-- Vue 3 -->
-        <script type="application/javascript" src='https://cdn.jsdelivr.net/npm/vue@3.0.2/dist/vue.global.js'></script>
+<head>
+    <link rel="stylesheet" href="../static/css/indexCSS.css">
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    </head>
-    <header>
-       
-    </header>
+    <!-- Bootstrap CSS -->
+    <link type="text/css" rel="stylesheet" href="../static/css/bootstrap.min.css" />
 
-    <main role="main">
+    <!-- Vue 3 -->
+    <script type="application/javascript" src='https://cdn.jsdelivr.net/npm/vue@3.0.2/dist/vue.global.js'></script>
+    <!-- Google maps api -->
 
-        <section class="jumbotron text-center">
-        
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key=AIzaSyC7FfBkqplq2aBVbZafCazFhUpny7Lx048"
+    async defer></script>
+    <script>
+        console.log(JSON.parse(sessionStorage.getItem("houses")))
+         // Initialize and add the map
+         function initMap() {
+            // The location of Singapore
+            var singapore = {lat: 1.287953, lng: 103.851784};
+            // The map, centered at Singapore
+            var map = new google.maps.Map(
+                document.getElementById('map'), {zoom: 13, center: singapore});
+            // The markers for the houses
+            for (index in houses) {
+            // console.log(typeof(houses[index].address))
+            var x = parseFloat(houses[index].latitude)
+            var y = parseFloat((houses[index].longitude))
+            addMarker({lat: x, lng: y})
+
+            // addMarker(parseInt(houses[index].latitude), parseInt((houses[index].longitude)))
+            }
+
+            // addMarker({lat: 1.3142899000, lng: 103.9005173400})
+
+            //Add marker function
+            function addMarker(coords){
+                console.log(coords)
+                var marker = new google.maps.Marker({
+                position: coords,
+                map: map,
+                title: "Hello World!",
+            });
+
+            }
+            }
+    </script>
+</head>
+<header>
+
+</header>
+
+<main role="main">
+
+    <section class="jumbotron text-center">
+
 
         <div class="container">
             <h1 class="jumbotron-heading">Available Stays</h1>
             <!-- <h4 id='summary' style="align-content: center; "></h4> -->
         </div>
+        <div class="container">
+            <div id="map"></div>
+        </div>
+        <div>
+            
+            <!--<input type="button" value="get location" onclick="getUserLocation()" />
+            <div id="locationData">Location data here</div>
+            <script src="http://maps.google.com/maps/api/js?sensor=false"></script>-->
+            <script type="text/javascript"
+                src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=weather"></script>
+        </div>
+    </section>
+    </script>
 
-        </section>
- 
-        <body id="app">
-            <div class="album py-5 bg-light">
+    <body id="app">
+        <div class="album py-5 bg-light">
             <div id='houses' class="container">
                 <div class="row">
-                <div v-for="house in houses" class="col-md-4">
-                    <div class="card mb-4 box-shadow">
-                    <img class="card-img-top" src="../assets/images/house.jpg" alt="Card image cap">
-                    <div class="card-body">
-        
-                        
-                        <p class="card-text">House name: {{house.houseName}}</p>
-                        <p class="card-text">Address: {{house.address}}</p>
-                        <p class="card-text">Price: ${{house.price}}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-primary">Book</button>
-                        </div>
+                    <div v-for="house in houses" class="col-md-4">
+                        <div class="card mb-4 box-shadow">
+                            <img class="card-img-top" src="../assets/images/house.jpg" alt="Card image cap">
+                            <div id="maps"></div>
+                            <div class="card-body">
+                                <p class="card-text">House name: {{house.houseName}}</p>
+                                <p class="card-text">Address: {{house.address}}</p>
+                                <p class="card-text">Price: ${{house.price}}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group align-items-left">
+                                        <button type="button" @click="makePayment()" class="btn btn-primary">Book</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    </div>
-                </div>
-                <!-- <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                     <div class="card mb-4 box-shadow">
                     <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
                     <div class="card-body">
@@ -175,87 +236,95 @@
                 </div> -->
                 </div>
             </div>
-            </div>
-        </body>
+        </div>
+    </body>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
 
-<script>
-    console.log(sessionStorage.getItem("houses"))
-    houses = JSON.parse(sessionStorage.getItem("houses"))
-    for (index in houses){
-        console.log(houses[index].address)
-    }
-
-    const app = Vue.createApp({
-
-    computed: {
-        makeBooking: function () {
-            return this.bookingAdded;
+    <script>
+        console.log(sessionStorage.getItem("houses"))
+        houses = JSON.parse(sessionStorage.getItem("houses"))
+        for (index in houses) {
+            console.log(houses[index].address)
         }
-    },
 
-    data() {
-        return{
-            test : "hello world",
-            houses: JSON.parse(sessionStorage.getItem("houses")),
+        const app = Vue.createApp({
+
+            computed: {
+                makePayment: function () {
+                    window.location.href = "../container-payment/Paypal Integration/standard-integration/public/index.html";
+                }
+            },
+
+            data() {
+                return {
+                    test: "hello world",
+                    houses: JSON.parse(sessionStorage.getItem("houses")),
+                }
+            },
+
+
+            methods: {
+                get_selected_ids_string() {
+                    selected_ids = []
+                    this.selected_service_ids = ''
+                    for (service of this.services) {
+                        if (this.selected_service.includes(service.name)) {
+                            id = service.id
+                            selected_ids.push(id)
+                            this.total_price += service.price
+                        }
+                    }
+                    this.selected_service_ids = selected_ids.join(",")
+                    console.log(this.selected_service_ids)
+                    console.log(this.total_price)
+                },
+
+                // PAYMENT WITH STRIPE
+                pay() {
+                    this.get_selected_ids_string();
+                    this.get_timeslot_string();
+                    this.createBooking();
+                }, //end of pay function
+
+
+            },
+        })
+
+        app.mount("#app")
+    </script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
         }
-    },
+        gtag('js', new Date());
+
+        gtag('config', 'UA-23581568-13');
+    </script>
+    <script defer
+        src="https://static.cloudflareinsights.com/beacon.min.js/vb26e4fa9e5134444860be286fd8771851679335129114"
+        integrity="sha512-M3hN/6cva/SjwrOtyXeUa5IuCT0sedyfT+jK/OV+s+D0RnzrTfwjwJHhd+wYfMm9HJSrZ1IKksOdddLuN6KOzw=="
+        data-cf-beacon='{"rayId":"7ae164b00aa82e9b","token":"cd0b4b3a733644fc843ef0b185f98241","version":"2023.3.0","si":100}'
+        crossorigin="anonymous"></script>
+
+    <!-- Bootstrap Javascript -->
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js'
+        integrity='sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM' crossorigin='anonymous'>
+    </script>
 
 
-    methods: {
-        get_selected_ids_string() {
-            selected_ids = []
-            this.selected_service_ids = ''
-            for (service of this.services){
-            if (this.selected_service.includes(service.name)){
-                id = service.id
-                selected_ids.push(id)
-                this.total_price += service.price
-            }
-            }
-            this.selected_service_ids = selected_ids.join(",")
-            console.log(this.selected_service_ids)
-            console.log(this.total_price)
-        },
+</main>
 
-        // PAYMENT WITH STRIPE
-        pay(){
-            this.get_selected_ids_string();
-            this.get_timeslot_string();
-            this.createBooking();
-        }, //end of pay function
-
-
-    },
-    })
-
-app.mount("#app")
-
-</script>  
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-23581568-13');
-
-
-</script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vb26e4fa9e5134444860be286fd8771851679335129114" integrity="sha512-M3hN/6cva/SjwrOtyXeUa5IuCT0sedyfT+jK/OV+s+D0RnzrTfwjwJHhd+wYfMm9HJSrZ1IKksOdddLuN6KOzw==" data-cf-beacon='{"rayId":"7ae164b00aa82e9b","token":"cd0b4b3a733644fc843ef0b185f98241","version":"2023.3.0","si":100}' crossorigin="anonymous"></script>
-
-<!-- Bootstrap Javascript -->
-<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js' integrity='sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM'crossorigin='anonymous'></script>
-
-    </main>
-
-    <footer class="text-muted">
-        <div class="container">
+<footer class="text-muted">
+    <div class="container">
         <p class="float-right">
             <a href="#">Back to top</a>
         </p>
         <p>&copy; Bootstrap</p>
-        </div>
+    </div>
 
-    </footer>
+</footer>
+
 </html>
