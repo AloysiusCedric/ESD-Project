@@ -41,52 +41,93 @@ class Payment(db.Model):
 @app.route('/payment', methods=['POST'])
 def payment_to_db():
     data = request.get_json()
-    status = data['status']
-    if (status == 'CONFIRMED'):
+    status = "confirmed"
+    if (status == 'confirmed'):
         tDate = datetime.datetime.strptime(data['tDate'], '%Y-%m-%dT%H:%M:%S')
-        paymentId = data['paymentId']
         housepId = data['housepId']
         paidAmount = data['paidAmount']
-        newPayment = Payment(paymentId = paymentId, tDate = tDate, paidAmount = paidAmount, status = status, housepId = housepId)
+        newPayment = Payment(tDate = tDate, paidAmount = paidAmount, status = status, housepId = housepId)
         db.session.add(newPayment)
         db.session.commit()
         result = {'message': 'New Entry created successfully!'}
     else:
-        result = {'message' : 'Transaction with paymentId '+paymentId+ 'is not confirmed!'}
+        result = {'message' : 'Transaction FAILED'}
+
     return jsonify(result)
+
+#######################################################################################################     FOR PAYPAL IF SUCCESS
+# @app.route('/payment', methods=['POST'])
+# def payment_to_db():
+#     data = request.get_json()
+#     status = data['status']
+#     if (status == 'CONFIRMED'):
+#         tDate = datetime.datetime.strptime(data['tDate'], '%Y-%m-%dT%H:%M:%S')
+#         # paymentId = data['paymentId']// FOR PAYPAL CAPTUREID if successful
+#         housepId = data['housepId']
+#         paidAmount = data['paidAmount']
+#         # newPayment = Payment(paymentId = paymentId, tDate = tDate, paidAmount = paidAmount, status = status, housepId = housepId)// FOR PAYPAL CAPTUREID if successful
+#         newPayment = Payment(tDate = tDate, paidAmount = paidAmount, status = status, housepId = housepId)
+#         db.session.add(newPayment)
+#         db.session.commit()
+#         result = {'message': 'New Entry created successfully!'}
+#     else:
+#         # result = {'message' : 'Transaction with paymentId '+paymentId+ 'is not confirmed!'} // FOR PAYPAL CAPTUREID if successful
+#         result = {'message' : 'Transaction FAILED'}
+
+#     return jsonify(result)
+#######################################################################################################     
 
 #change status from "confirmed" to "refunded"
 @app.route('/refund', methods=['POST'])
 def refund():
     data = request.get_json()
     paymentId = data['paymentId']
-    accessToken = data['accessToken']
     payment = Payment.query.filter_by(paymentId=paymentId).first()
     if payment:
-        if payment.status == "CONFIRMED":
-            # Construct the PayPal API endpoint URL
-            url = f"https://api-m.sandbox.paypal.com/v2/payments/captures/{paymentId}/refund"
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {accessToken}"
-            }
-            body = {}
-            response = requests.post(url, headers=headers, json=body)
-            data = response.json()
-            if data['status'] =='COMPLETED':
+        if payment.status == "confirmed":
                 payment.status = 'REFUNDED'
                 db.session.commit()
                 result = {'payment': payment.json(), 'message': 'Refund successful'}
                 return jsonify(result), 200
-            else:
-                result = {'message': 'Failed to create refund transaction'}
-                return jsonify(result), 500
         else:
-            result = {'message': 'Payment status is not CONFIRMED'}
-            return jsonify(result), 400
+            result = {'message': 'Failed to create refund transaction'}
+            return jsonify(result), 500
     else:
         result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
         return jsonify(result), 404
+
+#######################################################################################################     FOR PAYPAL IF SUCCESS
+# @app.route('/refund', methods=['POST'])
+# def refund():
+#     data = request.get_json()
+#     paymentId = data['paymentId']
+#     accessToken = data['accessToken']
+#     payment = Payment.query.filter_by(paymentId=paymentId).first()
+#     if payment:
+#         if payment.status == "CONFIRMED":
+#             # Construct the PayPal API endpoint URL
+#             url = f"https://api-m.sandbox.paypal.com/v2/payments/captures/{paymentId}/refund"
+#             headers = {
+#                 "Content-Type": "application/json",
+#                 "Authorization": f"Bearer {accessToken}"
+#             }
+#             body = {}
+#             response = requests.post(url, headers=headers, json=body)
+#             data = response.json()
+#             if data['status'] =='COMPLETED':
+#                 payment.status = 'REFUNDED'
+#                 db.session.commit()
+#                 result = {'payment': payment.json(), 'message': 'Refund successful'}
+#                 return jsonify(result), 200
+#             else:
+#                 result = {'message': 'Failed to create refund transaction'}
+#                 return jsonify(result), 500
+#         else:
+#             result = {'message': 'Payment status is not CONFIRMED'}
+#             return jsonify(result), 400
+#     else:
+#         result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
+#         return jsonify(result), 404
 
 # #refund completed, return status completed to booking complex microservice
 # @app.route('/payment/<string:paymentId>/complete', methods=['POST'])
@@ -100,6 +141,7 @@ def refund():
 #     else:
 #         result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
 #         return jsonify(result), 404
+#######################################################################################################     
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port = 5002, debug=True)
