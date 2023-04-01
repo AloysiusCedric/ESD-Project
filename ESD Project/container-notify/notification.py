@@ -27,20 +27,17 @@ def callback(channel, method, properties, body): # required signature for the ca
     print("\nReceived Order by " + __file__)
 
 
-    # Your Account SID from twilio.com/console
-    account_sid = "AC5f3f823542d896540c8a8c7d300474cf"
-    # Your Auth Token from twilio.com/console
-    auth_token  = "c8ae493a75d77b1e2030f966fb082b9a"
-
+    account_sid = 'ACc25a793016fa375e2402e95c52a1eb23'
+    auth_token = '4c93f4ad82c352be558a62b45c332e0a'
     client = Client(account_sid, auth_token)
 
     message = client.messages.create(
-        to="+6591086832", 
-        from_="+15017250604",
-        body="Hello from Python!")
+    from_='whatsapp:+14155238886',
+    body='Your cancellation has been received. We will work to process your refund within 3 working days.',
+    to='whatsapp:+6593863745'
+    )
 
     print(message.sid)
-
 
 
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
