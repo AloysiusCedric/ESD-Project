@@ -13,6 +13,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     </head>
     <header>
+        <script>
+            console.log(sessionStorage.getItem("houses"))
+            houses = JSON.parse(sessionStorage.getItem("houses"))
+            for (index in houses){
+                console.log(houses[index].address)
+            }
+
+            
+
+        </script>  
         <div class="collapse bg-dark" id="navbarHeader">
         <div class="container">
             <div class="row">
@@ -223,19 +233,7 @@
 
   gtag('config', 'UA-23581568-13');
 
-  document.getElementById("submit").addEventListener("click", function() {
-  var Odate = document.getElementById("Odate").value;
-  var Idate = document.getElementById("Idate").value;
 
-  console.log(Odate);
-
-  var dict = {
-  CheckIn: Idate, 
-  CheckOut: Odate
-  };
-
-  console.log(dict)
-});
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vb26e4fa9e5134444860be286fd8771851679335129114" integrity="sha512-M3hN/6cva/SjwrOtyXeUa5IuCT0sedyfT+jK/OV+s+D0RnzrTfwjwJHhd+wYfMm9HJSrZ1IKksOdddLuN6KOzw==" data-cf-beacon='{"rayId":"7ae164b00aa82e9b","token":"cd0b4b3a733644fc843ef0b185f98241","version":"2023.3.0","si":100}' crossorigin="anonymous"></script>
 
