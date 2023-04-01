@@ -53,13 +53,14 @@ INSERT INTO `g1t3-aangstay`.`house` (`houseId`,`houseName`,`address`,`latitude`,
 -- payment
 -- Note: paymentId = transactionId from PayPal
 CREATE TABLE IF NOT EXISTS `g1t3-aangstay`.`payment` (
-  `paymentId` NVARCHAR(18) NOT NULL,
+  `paymentId` INT NOT NULL AUTO_INCREMENT,
   `tDate` DATE NOT NULL,
   `paidAmount` DECIMAL(10,0) NOT NULL,
   `status` VARCHAR(25) NOT NULL,
   `housepId` INT NULL,
   PRIMARY KEY (`paymentId`),
   INDEX `housepId_idx` (`housepId` ASC) VISIBLE,
+  UNIQUE INDEX `paymentId_UNIQUE` (`paymentId`) VISIBLE,
   CONSTRAINT `housepId`
     FOREIGN KEY (`housepId`)
     REFERENCES `g1t3-aangstay`.`house` (`houseId`)
@@ -69,9 +70,11 @@ CREATE TABLE IF NOT EXISTS `g1t3-aangstay`.`payment` (
 
 INSERT INTO `g1t3-aangstay`.`payment` (`paymentId`, `tDate`, `paidAmount`, `status`, `housepId`) VALUES 
 -- status: COMPLETED/DECLINED/REFUNDED/FAILED
-('22828919WS328170T', '2023-03-21', '100', 'COMPLETED', 1),
-('2GC1726685321561L', '2023-03-21', '150', 'REFUNDED', 3),
-('4AY363202E056942B', '2023-03-23', '200', 'COMPLETED', 5);
+('1000000001', '2023-03-21', '100', 'COMPLETED', 1),
+('1000000002', '2023-03-21', '150', 'REFUNDED', 3),
+('1000000003', '2023-03-23', '200', 'COMPLETED', 5);
+-- ('4AY363202E056942B', '2023-03-23', '200', 'COMPLETED', 5); 
+-- FOR PAYPAL CAPTUREID if successful
 
 -- transaction (holds information about the dates and status of booking after payment is completed)
 -- status: completed, cancelled
@@ -82,8 +85,8 @@ CREATE TABLE IF NOT EXISTS `g1t3-aangstay`.`transaction` (
   `endDate` DATE NOT NULL,
   `status` VARCHAR(20) NOT NULL,
   `houseId` INT NOT NULL,
-  `bookingNum` NVARCHAR(6) NULL,
-  `paymentId` NVARCHAR(18) NOT NULL,
+  `bookingNum` VARCHAR(6) NULL,
+  `paymentId` INT NOT NULL,
   PRIMARY KEY (`transactionId`),
   INDEX `houseId_idx` (`houseId` ASC) VISIBLE,
   UNIQUE INDEX `transactionId_UNIQUE` (`transactionId`) VISIBLE,
@@ -100,10 +103,8 @@ CREATE TABLE IF NOT EXISTS `g1t3-aangstay`.`transaction` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 
-INSERT INTO `g1t3-aangstay`.`transaction` (`transactionId`,`startDate`, `endDate`,`status`,`houseId`,`bookingNum`,`paymentId`) VALUES
-('10000001','2023-04-05', '2023-04-09','confirmed','5','3FB3B3','22828919WS328170T'); 
-
 -- Dumping data for transaction db
 INSERT INTO `g1t3-aangstay`.`transaction` (`startDate`, `endDate`,`status`,`houseId`,`bookingNum`,`paymentId`) VALUES
-('2023-04-05', '2023-04-09','confirmed','6', '347F50', '2GC1726685321561L'),
-('2023-04-05', '2023-04-09','cancelled','5', '1CB14F','4AY363202E056942B');
+('2023-04-05', '2023-04-09','confirmed','5','3FB3B3','1000000001'),
+('2023-04-05', '2023-04-09','confirmed','6', '347F50', '1000000002'),
+('2023-04-05', '2023-04-09','cancelled','5', '1CB14F','1000000003');
