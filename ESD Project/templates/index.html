@@ -89,12 +89,14 @@
       var eDate = document.getElementById("eDate").value
       sessionStorage.setItem("startDate", sDate)
       sessionStorage.setItem("endDate", eDate)
+      console.log(typeof(sDate))
 
       dict = { "startDate" :sDate, 
                 "endDate":eDate
             }
       
       dict = JSON.stringify(dict)
+      console.log(dict)
       // fetch('http://127.0.0.1:5000/search', {
       // method: 'POST',
       // headers: {

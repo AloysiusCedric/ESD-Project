@@ -41,6 +41,7 @@ class Payment(db.Model):
 @app.route('/payment', methods=['POST'])
 def payment_to_db():
     data = request.get_json()
+    print(data)
     status = "confirmed"
     if (status == 'confirmed'):
         tDate = datetime.datetime.strptime(data['tDate'], '%Y-%m-%dT%H:%M:%S')

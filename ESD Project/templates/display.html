@@ -277,16 +277,17 @@
                     eDate = sessionStorage.getItem("endDate")
                     // alert([houseID,sDate, eDate])
                     bookingInfo = {"houseID":houseID,"hPrice":hPrice,"startDate" :sDate,"endDate":eDate}
-                    console.log(bookingInfo)
+                    console.log(typeof(eDate))
                     // window.location.href = "../container-payment/Paypal Integration/standard-integration/public/index.html";
                  
                 dict = { "startDate" :sDate, 
-                    "endDate":eDate,
+                    "endDate": eDate,
                     "hPrice":hPrice,
                     "houseID":houseID
                 }
         
                 dict = JSON.stringify(dict)
+                console.log(dict)
 
                 fetch("http://127.0.0.1:5000/pay",
                                     {
