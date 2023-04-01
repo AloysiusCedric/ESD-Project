@@ -47,6 +47,7 @@ def checkAvailability():
             print(ex_str)
 
             print(toCheck)
+            print("hello world")
 
             return jsonify({
                 "code": 500,
@@ -112,8 +113,12 @@ def checkTransaction(toCheck):
         print('\n\n-----Publishing the (checking info) message with routing_key=checking.info-----')      
         print("hello world")  
 
-        # invoke_http(activity_log_URL, method="POST", json=order_result)            
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checkTransaction.activity",  
+        # invoke_http(activity_log_URL, method="POST", json=order_result)
+        # amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.info", 
+        #     body=message, properties=pika.BasicProperties(delivery_mode = 2))
+        
+        # There is an error with the code below that cause the stream error         
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.info",  
             body= message)
         print("hello world")
     

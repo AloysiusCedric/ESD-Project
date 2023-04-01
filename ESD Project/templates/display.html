@@ -104,10 +104,10 @@
                             <div class="card-body">
                                 <p class="card-text">House name: {{house.houseName}}</p>
                                 <p class="card-text">Address: {{house.address}}</p>
-                                <p class="card-text">Price: ${{house.price}}</p>
+                                <p class="card-text">Price: ${{house.price}} </p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group align-items-left">
-                                        <button type="button" @click="makePayment()" class="btn btn-primary">Book</button>
+                                        <button  v-bind:id="house.houseId"type="button" @click="makePayment()" class="btn btn-primary">Book</button>
                                     </div>
                                 </div>
                             </div>
@@ -251,8 +251,8 @@
         const app = Vue.createApp({
 
             computed: {
-                makePayment: function () {
-                    window.location.href = "../container-payment/Paypal Integration/standard-integration/public/index.html";
+                book: function () {
+                   
                 }
             },
 
@@ -260,24 +260,20 @@
                 return {
                     test: "hello world",
                     houses: JSON.parse(sessionStorage.getItem("houses")),
+                    sDate: sessionStorage.getItem("startDate"),
+                    eDate: sessionStorage.getItem("endDate")
                 }
             },
 
 
             methods: {
-                get_selected_ids_string() {
-                    selected_ids = []
-                    this.selected_service_ids = ''
-                    for (service of this.services) {
-                        if (this.selected_service.includes(service.name)) {
-                            id = service.id
-                            selected_ids.push(id)
-                            this.total_price += service.price
-                        }
-                    }
-                    this.selected_service_ids = selected_ids.join(",")
-                    console.log(this.selected_service_ids)
-                    console.log(this.total_price)
+                makePayment() {
+                    houseID = (event.target.id)
+                    sessionStorage.setItem("houseID", houseID)
+                    // sDate = sessionStorage.getItem("startDate")
+                    // eDate = sessionStorage.getItem("endDate")
+                    console.log(houseID, this.sDate, this.eDate)
+                    // window.location.href = "../container-payment/Paypal Integration/standard-integration/public/index.html";
                 },
 
                 // PAYMENT WITH STRIPE

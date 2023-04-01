@@ -27,8 +27,6 @@ def callback(channel, method, properties, body): # required signature for the ca
     
     x = json.loads(body)
 
-    print(x["customer_id"])
-
 
 
 
