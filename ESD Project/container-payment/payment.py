@@ -49,11 +49,18 @@ def payment_to_db():
         newPayment = Payment(tDate = tDate, paidAmount = paidAmount, status = status, housepId = housepId)
         db.session.add(newPayment)
         db.session.commit()
-        result = {'message': 'New Entry created successfully!'}
-    else:
-        result = {'message' : 'Transaction FAILED'}
 
-    return jsonify(result)
+        payment_details = [tDate, paidAmount, status]
+
+        if len(payment_details) != 0 :
+            return jsonify({"code":201,
+                        "data": payment_details,
+                        "message": 'New Entry created successfully!'})
+        else :
+            return jsonify({"code":500,
+                        "message":'Transaction FAILED!!'})
+            
+        return jsonify(payment_details)
 
 #######################################################################################################     FOR PAYPAL IF SUCCESS
 # @app.route('/payment', methods=['POST'])
