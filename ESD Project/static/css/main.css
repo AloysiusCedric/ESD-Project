@@ -1521,7 +1521,7 @@ span.flatpickr-weekday {
   -ms-flex-align: center;
       align-items: center;
   font-family: 'Poppins', sans-serif;
-  background: url("../../images/background.jpg");
+  background: url("../../assets/images/background.jpg");
   background-size: cover;
   background-position: center center;
   padding: 15px;
@@ -1736,6 +1736,12 @@ span.flatpickr-weekday {
 
 .s002 form .inner-form .input-field.fifth-wrap .btn-search:hover {
   background: #af7d51;
+}
+
+.s002 form img{
+  text-align: center;
+  align-content: center;
+  /* padding-left: 350px; */
 }
 
 @media screen and (max-width: 992px) {
