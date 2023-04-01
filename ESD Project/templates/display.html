@@ -107,7 +107,7 @@
                                 <p class="card-text">Price: ${{house.price}} </p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group align-items-left">
-                                        <button  v-bind:id="house.houseId"type="button" @click="makePayment()" class="btn btn-primary">Book</button>
+                                        <button  v-bind:id="house.houseId" type="button" @click="makePayment()" class="btn btn-primary">Book</button>
                                     </div>
                                 </div>
                             </div>
@@ -270,13 +270,16 @@
                 makePayment() {
                     houseID = (event.target.id)
                     sessionStorage.setItem("houseID", houseID)
-                    // sDate = sessionStorage.getItem("startDate")
-                    // eDate = sessionStorage.getItem("endDate")
-                    alert(houseID)
+                    sDate = sessionStorage.getItem("startDate")
+                    eDate = sessionStorage.getItem("endDate")
+                    // alert([houseID,sDate, eDate])
+                    bookingInfo = {"houseID":houseID,"startDate" :sDate,"endDate":eDate}
+                    console.log(bookingInfo)
+                    alert('Proceed to checkout from '+sDate+'-'+eDate)
                     // window.location.href = "../container-payment/Paypal Integration/standard-integration/public/index.html";
                 },
 
-                // PAYMENT WITH STRIPE
+                // PAYMENT WITH PAYPAL
                 pay() {
                     this.get_selected_ids_string();
                     this.get_timeslot_string();
