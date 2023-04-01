@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
-import paypalrestsdk
+# import paypalrestsdk
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
@@ -8,11 +8,11 @@ from sqlalchemy.ext.declarative import declarative_base
 import datetime
 import json
 
-paypalrestsdk.configure({
-    "mode": "sandbox", # replace with "live" for production environment
-    "client_id": "Ab4eHmG5gXRQngWEXdRWm5LilInbI5QYMUPYA49YjJwExCBybR3EROtUa1K_uZECMcGWYsm0v_T6YXob",
-    "client_secret": "EEPtruSziLc33Fo3U3EbHzYKOkPOofkvFeW3T5zhvL_1_iUsLZluvkKTlnH0UZhNWd8qduLBR6z7l3PM"
-})
+# paypalrestsdk.configure({
+#     "mode": "sandbox", # replace with "live" for production environment
+#     "client_id": "Ab4eHmG5gXRQngWEXdRWm5LilInbI5QYMUPYA49YjJwExCBybR3EROtUa1K_uZECMcGWYsm0v_T6YXob",
+#     "client_secret": "EEPtruSziLc33Fo3U3EbHzYKOkPOofkvFeW3T5zhvL_1_iUsLZluvkKTlnH0UZhNWd8qduLBR6z7l3PM"
+# })
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay'

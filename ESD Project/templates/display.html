@@ -278,8 +278,46 @@
                     // alert([houseID,sDate, eDate])
                     bookingInfo = {"houseID":houseID,"hPrice":hPrice,"startDate" :sDate,"endDate":eDate}
                     console.log(bookingInfo)
-                    alert('Proceed to checkout from '+sDate+'-'+eDate)
                     // window.location.href = "../container-payment/Paypal Integration/standard-integration/public/index.html";
+                 
+                dict = { "startDate" :sDate, 
+                    "endDate":eDate,
+                    "hPrice":hPrice,
+                    "houseID":houseID
+                }
+        
+                dict = JSON.stringify(dict)
+
+                fetch("http://127.0.0.1:5000/pay",
+                                    {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-type": "application/json"
+                                        },
+                                        body: dict
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        
+                                        console.log(data);//data is the whole json body( use data.xx to get the value)
+
+                                        
+
+                                        // 3 cases
+                                        switch (data.code) {
+                                            case 201:
+                                                // window.location.href = "display.html"
+
+                                                // an alternate way is to add this one element into this.books
+                                                break;
+                                            case 400:
+                                            case 500:
+                                                alert("Returned error");
+                                        }
+                                    })
+            
+  
+
                 },
 
                 // PAYMENT WITH PAYPAL
