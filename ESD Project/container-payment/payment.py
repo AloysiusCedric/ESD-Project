@@ -59,8 +59,6 @@ def payment_to_db():
         else :
             return jsonify({"code":500,
                         "message":'Transaction FAILED!!'})
-            
-        return jsonify(payment_details)
 
 #######################################################################################################     FOR PAYPAL IF SUCCESS
 # @app.route('/payment', methods=['POST'])
