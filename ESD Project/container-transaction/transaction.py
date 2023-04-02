@@ -106,14 +106,16 @@ def add_transaction():
     return jsonify(result)
 
 
-@app.route('/transaction/<string:bookingNum>/cancel', methods=['POST'])
-def cancel_transaction(bookingNum):
+@app.route('/transaction/cancel', methods=['POST'])
+def cancel_transaction():
+    data = request.get_json()
+    bookingNum = data.get('bookingNum')
     transaction = Transaction.query.filter_by(bookingNum=bookingNum).first()
 
     if transaction:
         transaction.status = 'cancelled'
         db.session.commit()
-        result = {"code": 200,
+        result = {"code": 201,
                   'message': f'Transaction with bookingNum {bookingNum} has been cancelled.',
                   'paymentId': transaction.paymentId}
         return jsonify(result)
@@ -121,6 +123,7 @@ def cancel_transaction(bookingNum):
         result = {
             "code": 404, 'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
         return jsonify(result)
+
 
 
 if __name__ == '__main__':
