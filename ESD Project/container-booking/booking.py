@@ -25,9 +25,9 @@ house_record_URL = "http://localhost:5003/house_record" #Used to send houseID fr
 refund_URL = "http://localhost:5002/refund" #Use for booking cancellation
 
 ##home
-@app.route("/")
-def index():
-    return render_template("index.html")
+# @app.route("/")
+# def index():
+#     return render_template("index.html")
 
 
 ##Search for a stay scenario
