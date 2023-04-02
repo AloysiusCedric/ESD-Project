@@ -118,7 +118,7 @@ def checkTransaction(toCheck):
         #     body=message, properties=pika.BasicProperties(delivery_mode = 2))
         
         # There is an error with the code below that cause the stream error         
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.notification",  
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.info",  
             body= message)
         print("hello world")
     
@@ -272,6 +272,8 @@ def storeDetails(toPass):
 
     # Check the shipping result;
     # if a failure, send it to the error microservice.
+    message = json.dumps(transaction_result)
+    print(type(message))
     code = transaction_result["code"]
     if code not in range(200, 300):
         # Inform the error microservice
@@ -294,6 +296,13 @@ def storeDetails(toPass):
             },
             "message": "failed to create entry in the transaction MS."
         }
+    else:
+        # 4. Send booking notification
+        # record the activity log anyway
+        print('\n\n-----Publishing the (booking info) message with routing_key=booking.notification-----')        
+       #Publish message to AMQP broker          
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="booking.notification",  
+            body= message)
 
     # 7. Return JSON body with transaction result and house result, shipping record
     # If the code returned to HTML page is within 200-300, displayed successfully paid and display booking number
