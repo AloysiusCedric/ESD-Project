@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 
 
 class Transaction(db.Model):
-    transactionId = db.Column(db.String, primary_key=True)
+    transactionId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     startDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date, nullable=False)
     status = db.Column(db.String, nullable=False)
@@ -75,15 +75,11 @@ def add_transaction():
     paymentId = f"{data['paymentId']}"
     hPrice = data["hPrice"]
 
-    # Generate transactionId and bookingNum
-    transactionId = ''.join(random.choices(
-        string.ascii_uppercase + string.digits, k=10))
     bookingNum = ''.join(random.choices(
         string.ascii_uppercase + string.digits, k=6))
 
     # Create new transaction object and add to database
     new_transaction = Transaction(
-        transactionId=transactionId,
         houseId=houseId,
         startDate=startDate,
         endDate=endDate,
