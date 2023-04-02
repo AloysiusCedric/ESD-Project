@@ -141,7 +141,70 @@
 
     });
 
-      
+    // Use Case 3: Cancel
     </script>
+    <div>
+      <table>
+        <tr>
+          <th>Booking Cancellation</th>
+        </tr>
+        <tr>
+          <td>Booking Number:</td>
+          <td><input type="text" placeholder="ABC123" id="cancelNum" name="cancelNum"></td>
+          <td><button id="cancelBtn" type="button" maxlength = "6">Cancel</button></td>
+        </tr>
+      </table>
+    </div>
+
+
+
+    <script>
+
+        document.getElementById("cancelBtn").addEventListener("click", function() {
+        var toCancel = document.getElementById("cancelNum").value.toUpperCase()
+        sessionStorage.setItem("cancelNum,", toCancel)
+  
+        dict2 = {"cancelNum":toCancel}
+        
+        dict2 = JSON.stringify(dict2)
+        console.log(dict2)
+        
+        fetch("http://127.0.0.1:5001/cancel",
+                          {
+                              method: "POST",
+                              headers: {
+                                  "Content-type": "application/json"
+                              },
+                              body: dict2
+                          })
+                          .then(response => response.json())
+                          .then(data => {
+                              
+                              console.log(data);//data is the whole json body( use data.xx to get the value)
+  
+                              // console.log(typeof(data.data.house_result.data));//this returns an array of the house information(in dict form)
+                              cancelNum = JSON.stringify(data.data.cancelNumber.data) 
+                              
+                              sessionStorage.setItem("bookingNum", cancelNum)       ///////////////////////////// 
+                              
+  
+                              // 3 cases
+                              switch (data.code) {
+                                  case 201:
+                                      // window.location.href = "success.html"
+  
+                                      // an alternate way is to add this one element into this.books
+                                      break;
+                                  case 400:
+                                  case 500:
+                                      alert("Returned error");
+                              }
+                          })
+    
+  
+      });
+  
+        
+      </script>
   </body>
 </html>
