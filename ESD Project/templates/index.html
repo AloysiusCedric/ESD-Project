@@ -158,18 +158,18 @@
 
 
 
-    <script>
+      <script>
 
         document.getElementById("cancelBtn").addEventListener("click", function() {
         var toCancel = document.getElementById("cancelNum").value.toUpperCase()
-        sessionStorage.setItem("cancelNum,", toCancel)
+        sessionStorage.setItem("bookingNum,", toCancel)
   
-        dict2 = {"cancelNum":toCancel}
+        dict2 = {"bookingNum":toCancel}
         
         dict2 = JSON.stringify(dict2)
         console.log(dict2)
         
-        fetch("http://127.0.0.1:5001/cancel",
+        fetch("http://127.0.0.1:5000/cancel",
                           {
                               method: "POST",
                               headers: {
@@ -181,9 +181,10 @@
                           .then(data => {
                               
                               console.log(data);//data is the whole json body( use data.xx to get the value)
+                              // console.log(data.data.ctransaction_result.data);//data is the whole json body( use data.xx to get the value)
   
                               // console.log(typeof(data.data.house_result.data));//this returns an array of the house information(in dict form)
-                              cancelNum = JSON.stringify(data.data.cancelNumber.data) 
+                              cancelNum = JSON.stringify(data.data.ctransaction_result.data) 
                               
                               sessionStorage.setItem("bookingNum", cancelNum)       ///////////////////////////// 
                               
@@ -191,8 +192,10 @@
                               // 3 cases
                               switch (data.code) {
                                   case 201:
-                                      // window.location.href = "success.html"
-  
+                                      paymentId = data["data"]["cpayment result"]["data"]["paymentId"]
+                                      console.log(paymentId)
+                                      sessionStorage.setItem("paymentId", paymentId)
+                                      window.location.href = "cancelsuccess.html"
                                       // an alternate way is to add this one element into this.books
                                       break;
                                   case 400:
@@ -202,9 +205,70 @@
                           })
     
   
-      });
-  
-        
+      });  
       </script>
+
+      <!-- <script>
+
+        const app = Vue.createApp({
+
+            computed: {
+                book: function () {
+                   
+                }
+            },
+
+            data() {
+                return {
+                    test: "hello world",
+                    booking: JSON.parse(sessionStorage.getItem("houses")),
+                    // sDate: sessionStorage.getItem("startDate"),
+                    // eDate: sessionStorage.getItem("endDate")
+                }
+            },
+
+          cancelBooking() {
+            methods: {
+          
+                dict =  {"bookingNum":toCancel}
+        
+                dict = JSON.stringify(dict)
+                console.log(dict)
+
+                fetch("http://127.0.0.1:5000/pay",
+                                    {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-type": "application/json"
+                                        },
+                                        body: dict
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        
+                                        console.log(data);//data is the whole json body( use data.xx to get the value)
+
+                                        
+
+                                        // 3 cases
+                                        switch (data.code) {
+                                            case 201:
+                                                bookingNum = data["data"]["transaction result"]["data"]["bookingNum"]
+                                                console.log(bookingNum)
+                                                sessionStorage.setItem("bookingNum", bookingNum)
+                                                window.location.href = "success.html"
+
+                                                // an alternate way is to add this one element into this.books
+                                                break;
+                                            case 400:
+                                            case 500:
+                                                alert("Returned error");
+                                        }
+                                    })
+            },
+        });
+
+        app.mount("#app")
+    </script> -->
   </body>
 </html>

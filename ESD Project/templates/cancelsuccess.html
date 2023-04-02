@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success</title>
+</head>
+<body>
+    <h1 class="jumbotron-heading">Your booking has been cancelled successfully and the refund will be sent you within 3 working days!</h1>
+
+    <div class="card-body">
+
+        <p class="card-text">Booking Number: </p><span id="bookingNum"></span>
+        <img src="../assets/images/house.jpg">
+
+    <td><button id="cancelBtn" type="button">Return to <a href='index.html'>Home Page</a></button></td>
+
+
+</body>
+
+<script>
+    var paymentId = sessionStorage.getItem("paymentId")
+    console.log(paymentId)
+    document.getElementById("paymentId").innerText=paymentId
+</script>
+</html>
