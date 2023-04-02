@@ -102,7 +102,8 @@ def add_transaction():
             "endDate": endDate,
             "houseId": houseId,
             "paymentId": paymentId,
-            "hPrice": hPrice
+            "hPrice": hPrice,
+            "bookingNum": bookingNum
         }
     }
 
