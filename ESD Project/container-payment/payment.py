@@ -21,14 +21,13 @@ db = SQLAlchemy(app)
 
 class Payment(db.Model):
     __tablename__ = 'payment'
-    paymentId = db.Column(db.String(64),primary_key = True)
+    paymentId = db.Column(db.Integer,primary_key = True)
     tDate = db.Column(db.Date, nullable=True)
     paidAmount = db.Column(db.Float(precision=2), nullable=False)
     status = db.Column(db.String(64), nullable=False)
     housepId = db.Column(db.Integer, nullable=False)
 
-    def __init__(self,paymentId, paidAmount, status, tDate, housepId):
-        self.paymentId = paymentId
+    def __init__(self, paidAmount, status, tDate, housepId):
         self.paidAmount = paidAmount
         self.status = status
         self.tDate = tDate
@@ -41,26 +40,38 @@ class Payment(db.Model):
 @app.route('/payment', methods=['POST'])
 def payment_to_db():
     data = request.get_json()
-    print(data)
-    print(data["endDate"])
-    status = "confirmed"
-    if (status == 'confirmed'):
-        tDate = datetime.datetime.strptime(data['tDate'], '%Y-%m-%dT%H:%M:%S')
-        housepId = data['housepId']
-        paidAmount = data['paidAmount']
-        newPayment = Payment(tDate = tDate, paidAmount = paidAmount, status = status, housepId = housepId)
-        db.session.add(newPayment)
-        db.session.commit()
+    status = "COMPLETED"
+    if (status == 'COMPLETED'):
+        tDate = datetime.datetime.now().date()
+        startDate = data['startDate']
+        endDate = data['endDate']
+        houseID = data['houseID']
+        hPrice = data['hPrice']
+        newPayment = Payment(tDate = tDate, paidAmount = hPrice, status = status, housepId = houseID)
+        
+        try:
+            db.session.add(newPayment)
+            db.session.commit()
+            paymentId = newPayment.paymentId
+            payment_details = {"startDate": startDate, "endDate": endDate, "hPrice": hPrice, "houseID": houseID, "paymentId": paymentId}
+            return jsonify({"code": 201, "data": payment_details, "message": "New entry created successfully!"})
+        except:
+            db.session.rollback()
+            return jsonify({"code": 500, "message": "Transaction FAILED!!"})
+        
+        # db.session.add(newPayment)
+        # db.session.commit()
 
-        payment_details = [tDate, paidAmount, status]
+        # paymentId = newPayment.paymentId
+        # payment_details = {startDate, endDate, hPrice, houseID, paymentId}
 
-        if len(payment_details) != 0 :
-            return jsonify({"code":201,
-                        "data": payment_details,
-                        "message": 'New Entry created successfully!'})
-        else :
-            return jsonify({"code":500,
-                        "message":'Transaction FAILED!!'})
+        # if len(payment_details) != 0 :
+        #     return jsonify({"code":201,
+        #                 "data": payment_details,
+        #                 "message": 'New Entry created successfully!'})
+        # else :
+        #     return jsonify({"code":500,
+        #                 "message":'Transaction FAILED!!'})
 
 #######################################################################################################     FOR PAYPAL IF SUCCESS
 # @app.route('/payment', methods=['POST'])
