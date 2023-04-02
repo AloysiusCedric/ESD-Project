@@ -101,7 +101,8 @@ def add_transaction():
             "startDate": startDate,
             "endDate": endDate,
             "houseId": houseId,
-            "paymentId": paymentId
+            "paymentId": paymentId,
+            "hPrice": hPrice
         }
     }
 
