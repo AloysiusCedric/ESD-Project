@@ -99,20 +99,24 @@ def payment_to_db():
 @app.route('/refund', methods=['POST'])
 def refund():
     data = request.get_json()
+    print(data)
     paymentId = data['paymentId']
     payment = Payment.query.filter_by(paymentId=paymentId).first()
     if payment:
+        print(paymentId)    
         if payment.status == "COMPLETED":
                 payment.status = 'REFUNDED'
                 db.session.commit()
-                result = {'payment': payment.json(), 'message': 'Refund successful'}
-                return jsonify(result), 200
+                result = {"code":201 , 'payment': payment.json(), 'message': 'Refund successful'}
+                print (data)
+                return jsonify(result)
         else:
+            print("hello world")
             result = {'message': 'Failed to create refund transaction'}
-            return jsonify(result), 500
+            return jsonify(result)
     else:
         result = {'message': f'Transaction with paymentId {paymentId} not found in the database.'}
-        return jsonify(result), 404
+        return jsonify(result)
 
 #######################################################################################################     FOR PAYPAL IF SUCCESS
 # @app.route('/refund', methods=['POST'])

@@ -325,7 +325,7 @@ def cancel():
     if request.is_json:
         try:
             toCancel = request.get_json()
-            print("Received paymentId for cancellation in booking MS", toCancel)
+            print("Received booking number for cancellation in transaction MS", toCancel)
 
             #do the actual work
             #1. Send inputs from paypal{status, transactionID, houseID}
@@ -355,8 +355,8 @@ def cancel():
 
 def updateDetails(toCancel):
     # 3. Send the transaction info {status, transactionID, houseID}
-    # Invoke the payment microservice
-    print('\n-----Invoking payment microservice-----')
+    # Invoke the transaction microservice
+    print('\n-----Invoking transaction microservice-----')
     cancel_result = invoke_http('http://localhost:5001/transaction/cancel', method='POST', json=toCancel)
     print('result:', cancel_result)
   
@@ -368,7 +368,7 @@ def updateDetails(toCancel):
 
     if code not in range(200, 300):
         # Inform the error microservice
-        print('\n\n-----Publishing the (payment error) message with routing_key=payment.error-----')
+        print('\n\n-----Publishing the (payment error) message with routing_key=cancel.error-----')
 
         #Publish message to AMQP broker
         amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="cancel.error", 
@@ -394,11 +394,11 @@ def updateDetails(toCancel):
     # and a message sent to “Error” queue can be received by “Activity Log” too.
 
     else:
-        # 4. Record payment
+        # 4. Record cancellation
         # record the activity log anyway
-        print('\n\n-----Publishing the (payment info) message with routing_key=payment.info-----')        
+        print('\n\n-----Publishing the (cancel info) message with routing_key=payment.info-----')        
        #Publish message to AMQP broker          
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checkCancel.activity",  
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="cancel.activity",  
             body= message)
     
     print("\nOrder published to RabbitMQ Exchange.\n")
