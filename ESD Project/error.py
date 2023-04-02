@@ -23,6 +23,8 @@ def callback(channel, method, properties, body): # required signature for the ca
 
     print("\nReceived Order by " + __file__)
 
+    print(body)
+
     print(json.loads(body))
 
 
