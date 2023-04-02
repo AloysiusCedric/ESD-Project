@@ -22,7 +22,7 @@ transaction_URL = "http://localhost:5001/transaction_record" #Used for checking 
 create_transaction_URL="http://localhost:5001/transaction" #Used for creating entry in transaction MS when user pays
 payment_URL = "http://localhost:5002/payment" #Used for creating entry in payment MS when user pays
 house_record_URL = "http://localhost:5003/house_record" #Used to send houseID from transaction then get back infromation of houses when user search for a stay
-
+# cancel_URL = "http://localhost:5002/<string:bookingNum>/cancel" #Use for booking cancellation
 
 ##Search for a stay scenario
 @app.route("/search", methods=['POST'])
@@ -316,7 +316,147 @@ def storeDetails(toPass):
     
 
 
+################################################## CANCEL
 
+##Make cancallation scenario
+@app.route("/cancel", methods=['POST'])
+def cancel():
+    # Simple check of input format and data of the request are JSON
+    if request.is_json:
+        try:
+            toCancel = request.get_json()
+            print("Received paymentId for cancellation in booking MS", toCancel)
+
+            #do the actual work
+            #1. Send inputs from paypal{status, transactionID, houseID}
+
+            result = updateDetails(toCancel)
+            return jsonify(result), result["code"]
+
+        except Exception as e:
+            # Unexpected error in code
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
+            print(ex_str)
+
+            return jsonify({
+                "code": 500,
+                "message": "booking.py internal error: " + ex_str
+            }), 500
+          
+
+    # if reached here, not a JSON request.
+    return jsonify({
+        "code": 400,
+        "message": "Invalid JSON input: " + str(request.get_data())
+    }), 400
+
+
+def updateDetails(toCancel):
+    # 3. Send the transaction info {status, transactionID, houseID}
+    # Invoke the payment microservice
+    print('\n-----Invoking payment microservice-----')
+    cancel_result = invoke_http('http://localhost:5002/'+toCancel+'/cancel', method='POST', json=toCancel)
+    print('result:', cancel_result)
+  
+
+    # Check the transaction result; if a failure, send it to the error microservice.
+    code = cancel_result["code"]
+    message = json.dumps(cancel_result)
+    print(type(message))
+
+    if code not in range(200, 300):
+        # Inform the error microservice
+        print('\n\n-----Publishing the (payment error) message with routing_key=payment.error-----')
+
+        #Publish message to AMQP broker
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="cancel.error", 
+            body=message, properties=pika.BasicProperties(delivery_mode = 2)) 
+        # make message persistent within the matching queues until it is received by some receiver 
+        # (the matching queues have to exist and be durable and bound to the exchange)
+
+        # - reply from the invocation is not used;
+        # continue even if this invocation fails        
+        print("\nOrder status ({:d}) published to the RabbitMQ Exchange:".format(
+            code), cancel_result)
+
+        # 7. Return error
+        return {
+            "code": 500,
+            "data": {"cancel result": cancel_result},
+            "message": "failed to get paymentId for cancellation in the payment MS."
+        }
+
+    # Notice that we are publishing to "Activity Log" only when there is no error in order creation.
+    # In http version, we first invoked "Activity Log" and then checked for error.
+    # Since the "Activity Log" binds to the queue using '#' => any routing_key would be matched 
+    # and a message sent to “Error” queue can be received by “Activity Log” too.
+
+    else:
+        # 4. Record payment
+        # record the activity log anyway
+        print('\n\n-----Publishing the (payment info) message with routing_key=payment.info-----')        
+       #Publish message to AMQP broker          
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checkCancel.activity",  
+            body= message)
+    
+    print("\nOrder published to RabbitMQ Exchange.\n")
+    # - reply from the invocation is not used;
+    # continue even if this invocation fails
+
+
+    # 5. Send transaction details to transaction MS
+    # Invoke the transaction microservice
+    print('\n\n-----Invoking transaction microservice-----')    
+    
+    ctransaction_result = invoke_http(
+        create_transaction_URL, method="POST", json=cancel_result)
+    print("cancel transaction result", ctransaction_result, '\n')
+
+    # Check the shipping result;
+    # if a failure, send it to the error microservice.
+    message = json.dumps(ctransaction_result)
+    print(type(message))
+    code = ctransaction_result["code"]
+    if code not in range(200, 300):
+        # Inform the error microservice
+        print('\n\n-----Publishing the (transaction error) message with routing_key=transaction.error-----')
+
+        message = json.dumps(ctransaction_result)
+
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="transaction.error", 
+            body=message, properties=pika.BasicProperties(delivery_mode = 2))
+
+        print("\nhouse status ({:d}) published to the RabbitMQ Exchange:".format(
+            code), ctransaction_result)
+
+        # 7. Return error
+        return {
+            "code": 400,
+            "data": {
+                "payment result": cancel_result,
+                "transaction result": cancel_result
+            },
+            "message": "failed to update cancellation status in the transaction MS."
+        }
+    else:
+        # 4. Send booking notification
+        # record the activity log anyway
+        print('\n\n-----Publishing the (booking info) message with routing_key=booking.notification-----')        
+       #Publish message to AMQP broker          
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="booking.notification",  
+            body= message)
+
+    # 7. Return JSON body with transaction result and house result, shipping record
+    # If the code returned to HTML page is within 200-300, displayed successfully paid and display booking number
+    return {
+        "code": 201,
+        "data": {
+            "cancel result": cancel_result,
+            "cancel transaction result": ctransaction_result
+        }
+    }
     
 
 

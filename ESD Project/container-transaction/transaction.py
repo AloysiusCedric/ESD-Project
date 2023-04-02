@@ -57,11 +57,11 @@ def get_current_month_transactions():
         if not overlapping:
             available_house_ids.append(house_id)
     if len(available_house_ids) != 0:
-        return jsonify({"code": 200,
+        return jsonify({"code": 201,
                         "data": available_house_ids,
                         "message": "Available Houses houseids successfully returned."})
     else:
-        return jsonify({"code": 200,
+        return jsonify({"code": 201,
                         "message": "There are no available houses houseids"})
 
 
@@ -78,17 +78,21 @@ def add_transaction():
     bookingNum = ''.join(random.choices(
         string.ascii_uppercase + string.digits, k=6))
 
-    # Create new transaction object and add to database
-    new_transaction = Transaction(
-        houseId=houseId,
-        startDate=startDate,
-        endDate=endDate,
-        status="confirmed",
-        bookingNum=bookingNum,
-        paymentId=paymentId
-    )
-    db.session.add(new_transaction)
-    db.session.commit()
+    try:
+        # Create new transaction object and add to database
+        new_transaction = Transaction(
+            houseId=houseId,
+            startDate=startDate,
+            endDate=endDate,
+            status="confirmed",
+            bookingNum=bookingNum,
+            paymentId=paymentId
+        )
+        db.session.add(new_transaction)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({"code": 500,
+                        "message": "Failed to create transaction in the database."})
 
     result = {
         "code": 201,
@@ -106,14 +110,17 @@ def add_transaction():
     return jsonify(result)
 
 
-@app.route('/transaction/<string:bookingNum>/cancel', methods=['POST'])
-def cancel_transaction(bookingNum):
+
+@app.route('/transaction/cancel', methods=['POST'])
+def cancel_transaction():
+    data = request.get_json()
+    bookingNum = data.get('bookingNum')
     transaction = Transaction.query.filter_by(bookingNum=bookingNum).first()
 
     if transaction:
         transaction.status = 'cancelled'
         db.session.commit()
-        result = {"code": 200,
+        result = {"code": 201,
                   'message': f'Transaction with bookingNum {bookingNum} has been cancelled.',
                   'paymentId': transaction.paymentId}
         return jsonify(result)
@@ -121,6 +128,7 @@ def cancel_transaction(bookingNum):
         result = {
             "code": 404, 'message': f'Transaction with bookingNum {bookingNum} not found in the database.'}
         return jsonify(result)
+
 
 
 if __name__ == '__main__':
