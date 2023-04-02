@@ -1,11 +1,9 @@
 import json
 import os
-# from dotenv import load_dotenv
 
 import amqp_setup
 
 from twilio.rest import Client
-
 
 
 def receiveNoti():
@@ -23,48 +21,33 @@ def receiveNoti():
     #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
 
 def callback(channel, method, properties, body): # required signature for the callback; no return
-    TWILIO_SID = "AC5f3f823542d896540c8a8c7d300474cf"
-    TWILIO_AUTH = "caff0646663f7fbfed215652ab82e421"
-
-    body = json.loads(body)
-
-    if (body["status"] == "confirmed"):
-            bookingNum = body["data"]["bookingNum"]
-            startDate =  body["data"]["startDate"]
-            endDate =  body["data"]["endDate"]
-
-            account_sid = TWILIO_SID
-            auth_token = TWILIO_AUTH
-            print (auth_token)
-            client = Client(account_sid, auth_token)
-
-            message = client.messages.create(
-            from_="whatsapp:+14155238886",
-            body="Your booking from (" + str(startDate) + ") to (" + str(endDate) + ") has been confirmed. Your booking number is: " + str(bookingNum),
-            to='whatsapp:+6591086832'
-            )
-    else:
-
-        account_sid = 'AC5f3f823542d896540c8a8c7d300474cf'
-        auth_token = 'caff0646663f7fbfed215652ab82e421'
-        print (auth_token)
-        client = Client(account_sid, auth_token)
-
-
-
-
-        message = client.messages.create(
-        from_='whatsapp:+14155238886',
-        body="Your booking has been cancel and funds have been refunded!",
-        to='whatsapp:+6591086832'
-        )
-            
-
-
-
 
     print("\nReceived Order by " + __file__)
 
+
+    account_sid = 'AC5f3f823542d896540c8a8c7d300474cf'
+    auth_token = 'caff0646663f7fbfed215652ab82e421'
+    print (auth_token)
+    client = Client(account_sid, auth_token)
+
+   
+ 
+
+    message = client.messages.create(
+    from_='whatsapp:+14155238886',
+    body='Your cancellation has been received. We will work to process your refund within 3 working days.',
+    to='whatsapp:+6591086832'
+    )
+
+    # order = {'customer_id': "1", "order_id" : 10, 'qty': "10"} 
+    # order_id = json.dumps(order['order_id']) 
+    # paymentMsg = 'Your payment for order_id ' + order_id + ' has been successfully!' 
+     
+    # message = client.messages.create( 
+    # from_='whatsapp:+14155238886', 
+    # body=paymentMsg, 
+    # to='whatsapp:+6591086832' 
+    # ) 
 
     print(message.sid)
 
