@@ -220,6 +220,7 @@ def storeDetails(toPass):
     # Check the transaction result; if a failure, send it to the error microservice.
     code = payment_result["code"]
     message = json.dumps(payment_result)
+    print(type(message))
 
     if code not in range(200, 300):
         # Inform the error microservice
@@ -252,10 +253,9 @@ def storeDetails(toPass):
         # 4. Record payment
         # record the activity log anyway
         print('\n\n-----Publishing the (payment info) message with routing_key=payment.info-----')        
-
        #Publish message to AMQP broker          
         amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checkTransaction.activity",  
-            body= payment_result)
+            body= message)
     
     print("\nOrder published to RabbitMQ Exchange.\n")
     # - reply from the invocation is not used;
@@ -267,7 +267,7 @@ def storeDetails(toPass):
     print('\n\n-----Invoking transaction microservice-----')    
     
     transaction_result = invoke_http(
-        create_transaction_URL, method="POST", json=toPass)
+        create_transaction_URL, method="POST", json=payment_result)
     print("transaction result", transaction_result, '\n')
 
     # Check the shipping result;
