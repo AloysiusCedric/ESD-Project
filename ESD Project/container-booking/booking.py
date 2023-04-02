@@ -22,7 +22,7 @@ transaction_URL = "http://localhost:5001/transaction_record" #Used for checking 
 create_transaction_URL="http://localhost:5001/transaction" #Used for creating entry in transaction MS when user pays
 payment_URL = "http://localhost:5002/payment" #Used for creating entry in payment MS when user pays
 house_record_URL = "http://localhost:5003/house_record" #Used to send houseID from transaction then get back infromation of houses when user search for a stay
-# cancel_URL = "http://localhost:5002/<string:bookingNum>/cancel" #Use for booking cancellation
+refund_URL = "http://localhost:5002/refund" #Use for booking cancellation
 
 ##Search for a stay scenario
 @app.route("/search", methods=['POST'])
@@ -357,7 +357,7 @@ def updateDetails(toCancel):
     # 3. Send the transaction info {status, transactionID, houseID}
     # Invoke the payment microservice
     print('\n-----Invoking payment microservice-----')
-    cancel_result = invoke_http('http://localhost:5002/'+toCancel+'/cancel', method='POST', json=toCancel)
+    cancel_result = invoke_http('http://localhost:5001/transaction/cancel', method='POST', json=toCancel)
     print('result:', cancel_result)
   
 
@@ -384,7 +384,7 @@ def updateDetails(toCancel):
         # 7. Return error
         return {
             "code": 500,
-            "data": {"cancel result": cancel_result},
+            "data": {"cancel_result": cancel_result},
             "message": "failed to get paymentId for cancellation in the payment MS."
         }
 
@@ -408,10 +408,10 @@ def updateDetails(toCancel):
 
     # 5. Send transaction details to transaction MS
     # Invoke the transaction microservice
-    print('\n\n-----Invoking transaction microservice-----')    
+    print('\n\n-----Invoking payment microservice-----')    
     
     ctransaction_result = invoke_http(
-        create_transaction_URL, method="POST", json=cancel_result)
+        refund_URL, method="POST", json=cancel_result)
     print("cancel transaction result", ctransaction_result, '\n')
 
     # Check the shipping result;
@@ -436,7 +436,7 @@ def updateDetails(toCancel):
             "code": 400,
             "data": {
                 "payment result": cancel_result,
-                "transaction result": cancel_result
+                "cpayment result": ctransaction_result
             },
             "message": "failed to update cancellation status in the transaction MS."
         }
@@ -454,7 +454,7 @@ def updateDetails(toCancel):
         "code": 201,
         "data": {
             "cancel result": cancel_result,
-            "cancel transaction result": ctransaction_result
+            "cpayment result": ctransaction_result
         }
     }
     

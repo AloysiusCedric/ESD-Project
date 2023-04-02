@@ -102,7 +102,7 @@ def refund():
     paymentId = data['paymentId']
     payment = Payment.query.filter_by(paymentId=paymentId).first()
     if payment:
-        if payment.status == "confirmed":
+        if payment.status == "COMPLETED":
                 payment.status = 'REFUNDED'
                 db.session.commit()
                 result = {'payment': payment.json(), 'message': 'Refund successful'}
