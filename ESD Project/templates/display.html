@@ -307,7 +307,10 @@
                                         // 3 cases
                                         switch (data.code) {
                                             case 201:
-                                                // window.location.href = "display.html"
+                                                bookingNum = data["data"]["transaction result"]["data"]["bookingNum"]
+                                                console.log(bookingNum)
+                                                sessionStorage.setItem("bookingNum", bookingNum)
+                                                window.location.href = "success.html"
 
                                                 // an alternate way is to add this one element into this.books
                                                 break;

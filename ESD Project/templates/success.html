@@ -7,13 +7,18 @@
     <title>Success</title>
 </head>
 <body>
-    <h1 class="jumbotron-heading">Your booking is {{payment.status}}!</h1>
+    <h1 class="jumbotron-heading">Your booking is confirmed and a confirmation notification has been sent to your Whatsapp!</h1>
 
     <div class="card-body">
 
-        <p class="card-text">Transaction Date: {{payment.tDate}}</p>
-        <p class="card-text">Transaction Date: {{payment.paidAmount}}</p>
+        <p class="card-text">Booking Number: </p><span id="bookingNum"></span>
         <img src="../assets/images/house.jpg">
 
 </body>
+
+<script>
+    var bookingNum = sessionStorage.getItem("bookingNum")
+    console.log(bookingNum)
+    document.getElementById("bookingNum").innerText=bookingNum
+</script>
 </html>
