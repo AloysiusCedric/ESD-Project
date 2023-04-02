@@ -42,6 +42,7 @@ class Payment(db.Model):
 def payment_to_db():
     data = request.get_json()
     print(data)
+    print(data["endDate"])
     status = "confirmed"
     if (status == 'confirmed'):
         tDate = datetime.datetime.strptime(data['tDate'], '%Y-%m-%dT%H:%M:%S')
