@@ -27,7 +27,7 @@ class Transaction(db.Model):
 @app.route('/transaction_record', methods=['POST'])
 def get_current_month_transactions():
     data = request.get_json()
-    print("Receive an input from user for checking booking MS", data)
+    print("Receive an input from user for checking transaction MS", data)
     start_date_str = data.get('startDate')
     end_date_str = data.get('endDate')
     if start_date_str and end_date_str:

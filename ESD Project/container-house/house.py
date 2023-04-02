@@ -36,7 +36,7 @@ class House(db.Model):
 def get_houseId():
     if request.is_json:
         houseIds = request.get_json()
-        print(houseIds)
+        # print(houseIds)
         # houseIds = request.json['data'].split(',')
         houses_data = []
         for houseId in houseIds:
@@ -99,24 +99,6 @@ def processOrder(order):
             'message': 'House not found'
         }
         
-@app.route("/house") # normal access to all house data
-def get_all_houses():
-    houselist = House.query.all()
-    if len(houselist):
-        return jsonify(
-            {
-                "code": 200,
-                "data": {
-                    "house-list": [house.json() for house in houselist]
-                }
-            }
-        )
-    return jsonify(
-        {
-            "code": 404,
-            "message": "There are no available houses."
-        }
-    ), 404
         
 @app.route("/house/<string:houseId>")   # retreiving house data based on houseId 
 def find_by_houseId(houseId):

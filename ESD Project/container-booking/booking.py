@@ -1,5 +1,5 @@
 ##This willl be the complex micro service
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 import os, sys
@@ -24,6 +24,12 @@ payment_URL = "http://localhost:5002/payment" #Used for creating entry in paymen
 house_record_URL = "http://localhost:5003/house_record" #Used to send houseID from transaction then get back infromation of houses when user search for a stay
 refund_URL = "http://localhost:5002/refund" #Use for booking cancellation
 
+##home
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
 ##Search for a stay scenario
 @app.route("/search", methods=['POST'])
 def checkAvailability():
@@ -31,10 +37,10 @@ def checkAvailability():
     if request.is_json:
         try:
             toCheck = request.get_json()
-            print("Receive an input from user for checking booking MS", toCheck)
+            print("Receive an input from user for checking transaction MS", toCheck)
 
             #do the actual work
-            #1. Send user input {check in date, check out date, region}
+            #1. Send user input {start date, end date}
             result = checkTransaction(toCheck)
 
             return jsonify(result), result["code"]
@@ -63,16 +69,12 @@ def checkAvailability():
 
 
 def checkTransaction(toCheck):
-    # 2. Send the order info {cart items}
-    # Invoke the order microservice
+    # 2. Send the order info {start date, end date}
+    # Invoke the transaction microservice
     print('\n-----Invoking transaction microservice-----')
     transaction_result = invoke_http(transaction_URL, method='POST', json=toCheck)
     print('result:', transaction_result)
 
-    
-
-    # uncomment the line below for testing transaction
-    # return transaction_result
 
     # Check the transaction result; if a failure, send it to the error microservice.
     code = transaction_result["code"]
@@ -80,10 +82,8 @@ def checkTransaction(toCheck):
 
     if code not in range(200, 300):
         # Inform the error microservice
-        #print('\n\n-----Invoking error microservice as order fails-----')
         print('\n\n-----Publishing the (checking error) message with routing_key=checking.error-----')
 
-        # invoke_http(error_URL, method="POST", json=order_result)
         amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.error", 
             body=message, properties=pika.BasicProperties(delivery_mode = 2)) 
         # make message persistent within the matching queues until it is received by some receiver 
@@ -94,33 +94,21 @@ def checkTransaction(toCheck):
         print("\nOrder status ({:d}) published to the RabbitMQ Exchange:".format(
             code), transaction_result)
 
-        # 7. Return error
+        # 3. Return error
         return {
             "code": 500,
             "data": {"check_result": transaction_result},
             "message": "Checking failure sent for error handling."
         }
 
-    # Notice that we are publishing to "Activity Log" only when there is no error in order creation.
-    # In http version, we first invoked "Activity Log" and then checked for error.
-    # Since the "Activity Log" binds to the queue using '#' => any routing_key would be matched 
-    # and a message sent to “Error” queue can be received by “Activity Log” too.
-
     else:
-        # 4. Record new order
+        # 4. Record checking information
         # record the activity log anyway
-        #print('\n\n-----Invoking activity_log microservice-----')
         print('\n\n-----Publishing the (checking info) message with routing_key=checking.info-----')      
-        print("hello world")  
-
-        # invoke_http(activity_log_URL, method="POST", json=order_result)
-        # amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.info", 
-        #     body=message, properties=pika.BasicProperties(delivery_mode = 2))
-        
+      
         # There is an error with the code below that cause the stream error         
         amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="checking.info",  
             body= message)
-        print("hello world")
     
     print("\nOrder published to RabbitMQ Exchange.\n")
     # - reply from the invocation is not used;
@@ -130,23 +118,18 @@ def checkTransaction(toCheck):
     # 5. Send transaction details to house MS
     # Invoke the house microservice
     print('\n\n-----Invoking house microservice-----')    
-
-    # uncomment the line below to test
-    # return transaction_result
     
     house_result = invoke_http(
         house_record_URL, method="POST", json=transaction_result["data"])
     print("transaction result", house_result, '\n')
 
-    # Check the shipping result;
+    # Check the house result;
     # if a failure, send it to the error microservice.
     code = house_result["code"]
     if code not in range(200, 300):
         # Inform the error microservice
-        #print('\n\n-----Invoking error microservice as house fails-----')
         print('\n\n-----Publishing the (house error) message with routing_key=house.error-----')
 
-        # invoke_http(error_URL, method="POST", json=house_result)
         message = json.dumps(house_result)
         amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="house.error", 
             body=message, properties=pika.BasicProperties(delivery_mode = 2))
@@ -154,7 +137,7 @@ def checkTransaction(toCheck):
         print("\nhouse status ({:d}) published to the RabbitMQ Exchange:".format(
             code), house_result)
 
-        # 7. Return error
+        # 6. Return error
         return {
             "code": 400,
             "data": {
@@ -165,7 +148,7 @@ def checkTransaction(toCheck):
         }
 
     # 7. Return JSON body with transaction result and house result
-    # Use the house result and process the house ID to display all the house information and picture
+    # If the code returned to HTML page is within 201, display all the available houses
     return {
         "code": 201,
         "data": {
@@ -181,10 +164,10 @@ def payment():
     if request.is_json:
         try:
             toPass = request.get_json()
-            print("Receive payment status, transactionID for processing in booking MS", toPass)
+            print("Receive inputs from user to be passed for processing in the payment MS", toPass)
 
             #do the actual work
-            #1. Send inputs from paypal{status, transactionID, houseID}
+            #1. Send user inputs{houseId, start date, end date}
 
             result = storeDetails(toPass)
             return jsonify(result), result["code"]
@@ -210,7 +193,7 @@ def payment():
 
 
 def storeDetails(toPass):
-    # 3. Send the transaction info {status, transactionID, houseID}
+    # 2. Send the information to payment microservice{start date, end date, houseID}
     # Invoke the payment microservice
     print('\n-----Invoking payment microservice-----')
     payment_result = invoke_http(payment_URL, method='POST', json=toPass)
@@ -237,17 +220,12 @@ def storeDetails(toPass):
         print("\nOrder status ({:d}) published to the RabbitMQ Exchange:".format(
             code), payment_result)
 
-        # 7. Return error
+        # 3. Return error
         return {
             "code": 500,
             "data": {"payment result": payment_result},
             "message": "failed to create entry in the payment MS."
         }
-
-    # Notice that we are publishing to "Activity Log" only when there is no error in order creation.
-    # In http version, we first invoked "Activity Log" and then checked for error.
-    # Since the "Activity Log" binds to the queue using '#' => any routing_key would be matched 
-    # and a message sent to “Error” queue can be received by “Activity Log” too.
 
     else:
         # 4. Record payment
@@ -262,7 +240,7 @@ def storeDetails(toPass):
     # continue even if this invocation fails
 
 
-    # 5. Send transaction details to transaction MS
+    # 5. Send payment details to transaction MS
     # Invoke the transaction microservice
     print('\n\n-----Invoking transaction microservice-----')    
     
@@ -270,7 +248,7 @@ def storeDetails(toPass):
         create_transaction_URL, method="POST", json=payment_result)
     print("transaction result", transaction_result, '\n')
 
-    # Check the shipping result;
+    # Check the booking results;
     # if a failure, send it to the error microservice.
     message = json.dumps(transaction_result)
     print(type(message))
@@ -287,7 +265,7 @@ def storeDetails(toPass):
         print("\nhouse status ({:d}) published to the RabbitMQ Exchange:".format(
             code), transaction_result)
 
-        # 7. Return error
+        # 6. Return error
         return {
             "code": 400,
             "data": {
@@ -297,7 +275,7 @@ def storeDetails(toPass):
             "message": "failed to create entry in the transaction MS."
         }
     else:
-        # 4. Send booking notification
+        # 7. Send booking notification
         # record the activity log anyway
         print('\n\n-----Publishing the (booking info) message with routing_key=booking.notification-----')        
        #Publish message to AMQP broker          
@@ -305,7 +283,7 @@ def storeDetails(toPass):
             body= message)
 
     # 7. Return JSON body with transaction result and house result, shipping record
-    # If the code returned to HTML page is within 200-300, displayed successfully paid and display booking number
+    # If the code returned to HTML page is within 201, displayed successfully paid and display booking number
     return {
         "code": 201,
         "data": {
@@ -315,9 +293,6 @@ def storeDetails(toPass):
     }
     
 
-
-################################################## CANCEL
-
 ##Make cancallation scenario
 @app.route("/cancel", methods=['POST'])
 def cancel():
@@ -325,10 +300,10 @@ def cancel():
     if request.is_json:
         try:
             toCancel = request.get_json()
-            print("Received booking number for cancellation in transaction MS", toCancel)
+            print("Received booking number for cancellation", toCancel)
 
             #do the actual work
-            #1. Send inputs from paypal{status, transactionID, houseID}
+            #1. Send booking number from user{booking number}
 
             result = updateDetails(toCancel)
             return jsonify(result), result["code"]
@@ -354,7 +329,7 @@ def cancel():
 
 
 def updateDetails(toCancel):
-    # 3. Send the transaction info {status, transactionID, houseID}
+    # 2. Send the booking number to transaction microservice
     # Invoke the transaction microservice
     print('\n-----Invoking transaction microservice-----')
     cancel_result = invoke_http('http://localhost:5001/transaction/cancel', method='POST', json=toCancel)
@@ -381,17 +356,13 @@ def updateDetails(toCancel):
         print("\nOrder status ({:d}) published to the RabbitMQ Exchange:".format(
             code), cancel_result)
 
-        # 7. Return error
+        # 3. Return error
         return {
             "code": 500,
             "data": {"cancel_result": cancel_result},
             "message": "failed to get paymentId for cancellation in the payment MS."
         }
 
-    # Notice that we are publishing to "Activity Log" only when there is no error in order creation.
-    # In http version, we first invoked "Activity Log" and then checked for error.
-    # Since the "Activity Log" binds to the queue using '#' => any routing_key would be matched 
-    # and a message sent to “Error” queue can be received by “Activity Log” too.
 
     else:
         # 4. Record cancellation
@@ -406,32 +377,32 @@ def updateDetails(toCancel):
     # continue even if this invocation fails
 
 
-    # 5. Send transaction details to transaction MS
-    # Invoke the transaction microservice
+    # 5. Send paymentID gotten from transaction MS to payment MS
+    # Invoke the payment microservice
     print('\n\n-----Invoking payment microservice-----')    
     
     ctransaction_result = invoke_http(
         refund_URL, method="POST", json=cancel_result)
     print("cancel transaction result", ctransaction_result, '\n')
 
-    # Check the shipping result;
+    # Check the refund results;
     # if a failure, send it to the error microservice.
     message = json.dumps(ctransaction_result)
     print(type(message))
     code = ctransaction_result["code"]
     if code not in range(200, 300):
         # Inform the error microservice
-        print('\n\n-----Publishing the (transaction error) message with routing_key=transaction.error-----')
+        print('\n\n-----Publishing the (transaction error) message with routing_key=refund.error-----')
 
         message = json.dumps(ctransaction_result)
 
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="transaction.error", 
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="refund.error", 
             body=message, properties=pika.BasicProperties(delivery_mode = 2))
 
         print("\nhouse status ({:d}) published to the RabbitMQ Exchange:".format(
             code), ctransaction_result)
 
-        # 7. Return error
+        # 6. Return error
         return {
             "code": 400,
             "data": {
@@ -441,15 +412,15 @@ def updateDetails(toCancel):
             "message": "failed to update cancellation status in the transaction MS."
         }
     else:
-        # 4. Send booking notification
+        # 7. Send refund notification
         # record the activity log anyway
         print('\n\n-----Publishing the (refund info) message with routing_key=refund.notification-----')        
        #Publish message to AMQP broker          
         amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="refund.notification",  
             body= message)
 
-    # 7. Return JSON body with transaction result and house result, shipping record
-    # If the code returned to HTML page is within 200-300, displayed successfully paid and display booking number
+    # 7. Return JSON body with transaction cancel result and cancel payment result
+    # If the code returned to HTML page is within 201, display successfully refund to user
     return {
         "code": 201,
         "data": {
