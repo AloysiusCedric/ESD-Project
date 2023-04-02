@@ -57,11 +57,11 @@ def get_current_month_transactions():
         if not overlapping:
             available_house_ids.append(house_id)
     if len(available_house_ids) != 0:
-        return jsonify({"code": 200,
+        return jsonify({"code": 201,
                         "data": available_house_ids,
                         "message": "Available Houses houseids successfully returned."})
     else:
-        return jsonify({"code": 200,
+        return jsonify({"code": 201,
                         "message": "There are no available houses houseids"})
 
 
@@ -78,17 +78,21 @@ def add_transaction():
     bookingNum = ''.join(random.choices(
         string.ascii_uppercase + string.digits, k=6))
 
-    # Create new transaction object and add to database
-    new_transaction = Transaction(
-        houseId=houseId,
-        startDate=startDate,
-        endDate=endDate,
-        status="confirmed",
-        bookingNum=bookingNum,
-        paymentId=paymentId
-    )
-    db.session.add(new_transaction)
-    db.session.commit()
+    try:
+        # Create new transaction object and add to database
+        new_transaction = Transaction(
+            houseId=houseId,
+            startDate=startDate,
+            endDate=endDate,
+            status="confirmed",
+            bookingNum=bookingNum,
+            paymentId=paymentId
+        )
+        db.session.add(new_transaction)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({"code": 500,
+                        "message": "Failed to create transaction in the database."})
 
     result = {
         "code": 201,
@@ -104,6 +108,7 @@ def add_transaction():
     }
 
     return jsonify(result)
+
 
 
 @app.route('/transaction/cancel', methods=['POST'])
