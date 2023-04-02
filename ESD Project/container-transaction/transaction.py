@@ -96,6 +96,7 @@ def add_transaction():
 
     result = {
         "code": 201,
+        "status": "confirmed",
         "message": "Your booking is successful",
         "data": {
             "startDate": startDate,

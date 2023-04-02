@@ -24,7 +24,7 @@ def callback(channel, method, properties, body): # required signature for the ca
 
     body = json.loads(body)
 
-    if (body["code"] == 201):
+    if (body["status"] == "confirmed"):
             bookingNum = body["data"]["bookingNum"]
             startDate =  body["data"]["startDate"]
             endDate =  body["data"]["endDate"]
@@ -42,6 +42,22 @@ def callback(channel, method, properties, body): # required signature for the ca
             body="Your booking from (" + str(startDate) + ") to (" + str(endDate) + ") has been confirmed. Your booking number is: " + str(bookingNum),
             to='whatsapp:+6591086832'
             )
+    else:
+
+        account_sid = 'AC5f3f823542d896540c8a8c7d300474cf'
+        auth_token = 'caff0646663f7fbfed215652ab82e421'
+        print (auth_token)
+        client = Client(account_sid, auth_token)
+
+
+
+
+        message = client.messages.create(
+        from_='whatsapp:+14155238886',
+        body="Your booking has been cancel and funds have been refunded!",
+        to='whatsapp:+6591086832'
+        )
+            
 
 
 

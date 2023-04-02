@@ -99,19 +99,19 @@ def payment_to_db():
 @app.route('/refund', methods=['POST'])
 def refund():
     data = request.get_json()
-    print(data)
     paymentId = data['paymentId']
     payment = Payment.query.filter_by(paymentId=paymentId).first()
-    if payment:
-        print(paymentId)    
+    if payment:   
         if payment.status == "COMPLETED":
                 payment.status = 'REFUNDED'
                 db.session.commit()
-                result = {"code":201 , 'payment': payment.json(), 'message': 'Refund successful'}
+                result = {"code":201 ,
+                          "status" : "refunded",
+                          'payment': payment.json(),
+                          'message': 'Refund successful'}
                 print (data)
                 return jsonify(result)
         else:
-            print("hello world")
             result = {'message': 'Failed to create refund transaction'}
             return jsonify(result)
     else:

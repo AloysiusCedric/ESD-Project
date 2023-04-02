@@ -443,9 +443,9 @@ def updateDetails(toCancel):
     else:
         # 4. Send booking notification
         # record the activity log anyway
-        print('\n\n-----Publishing the (booking info) message with routing_key=booking.notification-----')        
+        print('\n\n-----Publishing the (refund info) message with routing_key=refund.notification-----')        
        #Publish message to AMQP broker          
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="booking.notification",  
+        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="refund.notification",  
             body= message)
 
     # 7. Return JSON body with transaction result and house result, shipping record
