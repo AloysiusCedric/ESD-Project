@@ -4,15 +4,13 @@ import datetime
 import calendar
 import string
 import random
-
+from os import environ
 from flask_cors import CORS
 app = Flask(__name__)
-CORS(app)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
+CORS(app)
 
 class Transaction(db.Model):
     transactionId = db.Column(db.Integer, primary_key=True, autoincrement=True)

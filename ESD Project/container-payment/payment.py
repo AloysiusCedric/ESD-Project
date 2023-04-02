@@ -7,6 +7,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
 import json
+from os import environ
+from flask_cors import CORS
 
 # paypalrestsdk.configure({
 #     "mode": "sandbox", # replace with "live" for production environment
@@ -15,10 +17,10 @@ import json
 # })
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root@localhost:3306/g1t3-aangstay'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
+CORS(app)
 class Payment(db.Model):
     __tablename__ = 'payment'
     paymentId = db.Column(db.Integer,primary_key = True)

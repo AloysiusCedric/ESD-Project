@@ -1,0 +1,150 @@
+# IMPT REMINDER: unexpose all the ports of simple MS that is not interacting directly with the UI ()
+
+version: "3.8"
+
+volumes:
+  rabbitmq_data:
+
+services:
+
+  ####################################
+  # RabbitMQ: The messaging broker   
+  ####################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: esd-rabbit
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes: 
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  #################################################
+  # Activity Log: The Activity Log microservice
+  #################################################
+  activity_log:
+    build:
+      context: ../
+      dockerfile: activity_log.Dockerfile
+    image: g1t3aangstay/activity_log
+    # restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+
+  ###################################
+  # Error: The Error microservice
+  ###################################
+  error:
+    build:
+      context: ../
+      dockerfile: error.Dockerfile
+    image: g1t3aangstay/error
+    # restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+
+
+#   #################################################
+#   # Notify: The Notify microservice (SIMPLE)
+#   #################################################
+  notify:
+    build:
+      context: ../container-notify
+      dockerfile: Dockerfile
+    image: g1t3aangstay/notify
+    container_name: notify
+    # restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+
+#   ##################################
+#   # Transaction: The transaction microservice (SIMPLE)
+#   ##################################
+  transaction:
+    build:
+      context: ../container-transaction
+      dockerfile: Dockerfile
+    image: g1t3aangstay/transaction
+    container_name: transaction
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://is213_proj@host.docker.internal:3306/g1t3-aangstay
+      PYTHONUNBUFFERED: 1
+    # ports:
+    #   - "5001:5001"
+
+#   ###################################
+#   # Payment: The Payment microservice (SIMPLE)
+#   ###################################
+  payment:
+    build:
+      context: ../container-payment
+      dockerfile: Dockerfile
+    image: g1t3aangstay/payment
+    container_name: payment
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://is213_proj@host.docker.internal:3306/g1t3-aangstay
+      PYTHONUNBUFFERED: 1
+    # ports:
+    #   - "5002:5002"
+
+
+#   ##################################
+#   # House: The House microservice (SIMPLE)
+#   ##################################
+  house:
+    build:
+      context: ../container-house
+      dockerfile: Dockerfile
+    image: g1t3aangstay/house
+    container_name: house
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://is213_proj@host.docker.internal:3306/g1t3-aangstay
+      PYTHONUNBUFFERED: 1
+    # ports:
+    #   - "5003:5003"
+
+
+#  ###############################################
+#   # Booking: The CreateBooking microservice (COMPLEX)
+#   # has amqp!
+#   ###############################################
+  booking:
+    build:
+      context: ../container-booking
+      dockerfile: Dockerfile
+    image: g1t3aangstay/booking
+    container_name: booking
+    # restart: always
+    depends_on:
+      - rabbitmq
+      - house
+      - transaction
+      - payment
+      - notify
+    environment:
+      transaction_URL: "http://localhost:5001/transaction_record" #Used for checking transaction to search a stay
+      create_transaction_URL: "http://localhost:5001/transaction" #Used for creating entry in transaction MS when user pays
+      payment_URL: "http://localhost:5002/payment" #Used for creating entry in payment MS when user pays
+      house_record_URL: "http://localhost:5003/house_record" #Used to send houseID from transaction then get back infromation of houses when user search for a stay
+      refund_URL: "http://localhost:5002/refund" #Use for booking cancellation
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5000:5000" 

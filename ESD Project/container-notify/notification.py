@@ -1,10 +1,15 @@
 import json
 import os
+from dotenv import load_dotenv
 
 import amqp_setup
 
 from twilio.rest import Client
 
+load_dotenv()
+TWILIO_SID = os.getenv("TWILIO_SID")
+TWILIO_AUTH = os.getenv("TWILIO_AUTH")
+TWILIO_SENDER = os.getenv("TWILIO_SENDER")
 
 def receiveNoti():
 
@@ -29,16 +34,13 @@ def callback(channel, method, properties, body): # required signature for the ca
             startDate =  body["data"]["startDate"]
             endDate =  body["data"]["endDate"]
 
-            account_sid = 'AC5f3f823542d896540c8a8c7d300474cf'
-            auth_token = 'caff0646663f7fbfed215652ab82e421'
+            account_sid = TWILIO_SID
+            auth_token = TWILIO_AUTH
             print (auth_token)
             client = Client(account_sid, auth_token)
 
-        
-        
-
             message = client.messages.create(
-            from_='whatsapp:+14155238886',
+            from_=TWILIO_SENDER,
             body="Your booking from (" + str(startDate) + ") to (" + str(endDate) + ") has been confirmed. Your booking number is: " + str(bookingNum),
             to='whatsapp:+6591086832'
             )
